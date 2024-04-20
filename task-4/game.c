@@ -7,9 +7,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define SHM_KEY 1234
-#define MSG_KEY 5678
-
+#define SHM_KEY 0x1234          // Shared memory key
+#define PLAYER_QUEUE_KEY 0x5678 // Message queue key (player to game)
+#define GAME_QUEUE_KEY 0x9ABC   // Message queue key (game to player)
 #define MAX_BUFFER 100
 
 typedef struct {
@@ -120,35 +120,3 @@ int main() {
     return 0;
 }
 
-#define SOCKET_PATH "/tmp/tictactoe_socket"
-
-void setup_server_socket(int *server_fd) {
-    struct sockaddr_un addr;
-
-    if ((*server_fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
-        perror("socket error");
-        exit(-1);
-    }
-
-    memset(&addr, 0, sizeof(addr));
-    addr.sun_family = AF_UNIX;
-    strncpy(addr.sun_path, SOCKET_PATH, sizeof(addr.sun_path) - 1);
-    unlink(SOCKET_PATH);
-
-    if (bind(*server_fd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
-        perror("bind error");
-        exit(-1);
-    }
-
-    if (listen(*server_fd, 5) == -1) {
-        perror("listen error");
-        exit(-1);
-    }
-}
-
-void accept_client(int server_fd, int *client_fd) {
-    if ((*client_fd = accept(server_fd, NULL, NULL)) == -1) {
-        perror("accept error");
-        exit(-1);
-    }
-}
