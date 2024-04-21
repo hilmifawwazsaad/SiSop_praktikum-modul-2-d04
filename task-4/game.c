@@ -4,12 +4,12 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <sys/shm.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #define SHM_KEY 0x1234          // Shared memory key
-#define PLAYER_QUEUE_KEY 0x5678 // Message queue key (player to game)
-#define GAME_QUEUE_KEY 0x9ABC   // Message queue key (game to player)
+#define PLAYER_QUEUE_KEY 0x5678 // Message queue key
+#define GAME_QUEUE_KEY 0x9ABC   // Message queue key for responses
+
 #define MAX_BUFFER 100
 
 typedef struct {
@@ -18,9 +18,9 @@ typedef struct {
 } message_buf;
 
 typedef struct {
-    int player_type_taken[2]; // 0 for X, 1 for O
-    char board[9];            // Tic-tac-toe board
-    int turn;                 // 0 for X's turn, 1 for O's turn
+    int player_type_taken[2];  // 0 for 'X', 1 for 'O'
+    char board[9];             // Tic-tac-toe board
+    int turn;                  // 0 for 'X's turn, 1 for 'O's turn
 } SharedData;
 
 int setup_shared_memory() {
@@ -32,8 +32,8 @@ int setup_shared_memory() {
     return shmid;
 }
 
-int setup_message_queue() {
-    int msgid = msgget(MSG_KEY, 0666 | IPC_CREAT);
+int setup_message_queue(key_t key) {
+    int msgid = msgget(key, 0666 | IPC_CREAT);
     if (msgid == -1) {
         perror("msgget failed");
         exit(1);
@@ -41,11 +41,10 @@ int setup_message_queue() {
     return msgid;
 }
 
-void initialize_board(SharedData *data) {
+void initialize_board(char *board) {
     for (int i = 0; i < 9; i++) {
-        data->board[i] = '1' + i;  // Initialize board with numbers 1-9
+        board[i] = '1' + i;  // Initialize board with numbers 1-9
     }
-    data->turn = 0;  // X starts first
 }
 
 int check_winner(char *board) {
@@ -62,7 +61,7 @@ int check_winner(char *board) {
 void display_board(char *board) {
     printf("\n");
     for (int i = 0; i < 9; i += 3) {
-        printf(" %c | %c | %c \n", board[i], board[i+1], board[i+2]);
+        printf(" %c | %c | %c \n", board[i], board[i + 1], board[i + 2]);
         if (i < 6) {
             printf("---|---|---\n");
         }
@@ -72,51 +71,56 @@ void display_board(char *board) {
 
 int main() {
     int shmid = setup_shared_memory();
-    int msgid = setup_message_queue();
-    SharedData *data = (SharedData *)shmat(shmid, NULL, 0);
-    if (data == (void *)-1) {
-        perror("Shared memory attach");
-        shmctl(shmid, IPC_RMID, NULL); // Clean up shared memory on failure
-        msgctl(msgid, IPC_RMID, NULL); // Clean up message queue on failure
+    int player_queue_id = setup_message_queue(PLAYER_QUEUE_KEY);
+    int game_queue_id = setup_message_queue(GAME_QUEUE_KEY);
+
+    SharedData *shared_data = (SharedData *)shmat(shmid, NULL, 0);
+    if (shared_data == (void *)-1) {
+        perror("Shared memory attach failed");
         exit(1);
     }
 
-    memset(data->player_type_taken, 0, sizeof(data->player_type_taken));
-    initialize_board(data);
+    // Initialize game state
+    initialize_board(shared_data->board);
+    shared_data->turn = 0;  // 'X' starts first
 
     message_buf rbuf;
-    int winner = 0;
-    int moves = 0;
 
-    printf("Game started!\n");
-    display_board(data->board);
-
-    while (winner == 0 && moves < 9) {
-        if (msgrcv(msgid, &rbuf, sizeof(rbuf), 0, 0) > 0) {
-            printf("New Move by Player %c: %d\n", (rbuf.mesg_type == 1 ? 'X' : 'O'), rbuf.choice);
+    while (1) {
+        if (msgrcv(player_queue_id, &rbuf, sizeof(rbuf), 1, 0) > 0) {  // Receive messages of type '1'
+            printf("New Move by Player %c: %d\n", (shared_data->turn == 0 ? 'X' : 'O'), rbuf.choice);
 
             int index = rbuf.choice - 1;
-            if (index >= 0 && index < 9 && data->board[index] == '1' + index) {
-                data->board[index] = (rbuf.mesg_type == 1 ? 'X' : 'O');
-                moves++;
-                display_board(data->board);
-                winner = check_winner(data->board);
+
+            if (index >= 0 && index < 9 && shared_data->board[index] == '1' + index) {
+                shared_data->board[index] = (shared_data->turn == 0 ? 'X' : 'O');
+                shared_data->turn = 1 - shared_data->turn;  // Switch turns
+                display_board(shared_data->board);
+
+                // Check for winner
+                int winner = check_winner(shared_data->board);
                 if (winner != 0) {
                     printf("Player %c wins!\n", (winner == 1 ? 'X' : 'O'));
-                } else if (moves == 9) {
+                    break;  // Game over
+                } else if (shared_data->board[0] != '1' || shared_data->board[8] != '9') {
                     printf("Game Draw!\n");
+                    break;  // Draw
                 }
-                data->turn = 1 - data->turn;
             } else {
+                // Invalid move or cell taken
                 printf("Invalid move. Try again.\n");
             }
+        } else {
+            perror("msgrcv failed");
+            break;  // Break loop on message queue failure
         }
     }
 
-    // Clean up
-    shmdt(data);                        // Detach from shared memory
-    shmctl(shmid, IPC_RMID, NULL);      // Remove shared memory
-    msgctl(msgid, IPC_RMID, NULL);      // Remove message queue
+    // Clean up shared memory and message queue
+    shmdt(shared_data);  
+    shmctl(shmid, IPC_RMID, NULL);  
+    msgctl(player_queue_id, IPC_RMID, NULL); 
+    msgctl(game_queue_id, IPC_RMID, NULL);
+
     return 0;
 }
-

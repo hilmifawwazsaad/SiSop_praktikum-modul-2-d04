@@ -4,11 +4,12 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <sys/shm.h>
-#include <sys/types.h>
+#include <unistd.h>
 
-#define SHM_KEY 1234
-#define MSG_KEY 5678
+#define SHM_KEY 0x1234          // Shared memory key
+#define PLAYER_QUEUE_KEY 0x5678  // Message queue key (player to game)
 
+#define MAX_BUFFER 100
 
 typedef struct {
     long mesg_type;
@@ -16,7 +17,7 @@ typedef struct {
 } message_buf;
 
 typedef struct {
-    int player_type_taken[2]; // 0 for X, 1 for O
+    int player_type_taken[2]; // 0 for 'X', 1 for 'O'
 } SharedData;
 
 int setup_shared_memory() {
@@ -29,7 +30,7 @@ int setup_shared_memory() {
 }
 
 int setup_message_queue() {
-    int msgid = msgget(MSG_KEY, 0666 | IPC_CREAT);
+    int msgid = msgget(PLAYER_QUEUE_KEY, 0666 | IPC_CREAT);
     if (msgid == -1) {
         perror("msgget failed");
         exit(1);
@@ -39,36 +40,40 @@ int setup_message_queue() {
 
 int main() {
     int shmid = setup_shared_memory();
+    SharedData *shared_data = (SharedData *)shmat(shmid, NULL, 0);
+
     int msgid = setup_message_queue();
-    SharedData *data = (SharedData *)shmat(shmid, NULL, 0);
 
-    if (data == (void *)-1) {
-        perror("Shared memory attach");
-        exit(1);
-    }
-
+    // Choose player type
     int player_type = 0;
     printf("Available player types:\n1. X\n2. O\nEnter your choice (1 or 2): ");
     scanf("%d", &player_type);
 
-    if (player_type < 1 || player_type > 2 || data->player_type_taken[player_type-1] != 0) {
-        printf("'X' or 'O' has already been taken, choose other player types\n");
-        exit(0);
-    } else {
-        data->player_type_taken[player_type-1] = 1;
-        printf("You play as '%c'\n", (player_type == 1 ? 'X' : 'O'));
+    if (player_type < 1 || player_type > 2 || shared_data->player_type_taken[player_type - 1] != 0) {
+        printf("'%c' has already been taken, choose other player types\n", (player_type == 1 ? 'X' : 'O'));
+        return 1;
     }
 
-    int cell_number;
-    printf("Enter a cell number (1-9): ");
-    scanf("%d", &cell_number);
+    shared_data->player_type_taken[player_type - 1] = 1;
+    printf("You play as '%c'\n", (player_type == 1 ? 'X' : 'O'));
 
+    // Sending moves to game.c
     message_buf sbuf;
-    sbuf.mesg_type = player_type;  // Player X or O
-    sbuf.choice = cell_number;
+    sbuf.mesg_type = player_type;  // Message type '1' for Player 'X', '2' for Player 'O'
 
-    msgsnd(msgid, &sbuf, sizeof(sbuf), 0);
+    while (1) {  
+        printf("Your turn. Enter a cell number (1-9): ");
+        int cell_number;
+        scanf("%d", &cell_number);
 
-    shmdt(data);
+        sbuf.choice = cell_number;
+        msgsnd(msgid, &sbuf, sizeof(sbuf), 0);  // Send move
+        
+        // You might need additional code here to handle responses from game.c
+    }
+
+    // Cleanup
+    shmdt(shared_data);  
+
     return 0;
 }
