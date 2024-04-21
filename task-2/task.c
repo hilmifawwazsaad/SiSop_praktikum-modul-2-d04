@@ -221,12 +221,12 @@ void *yuan(void *arg)
 
 void work_task_yuan(const char *yuan_path)
 {
-    DIR *dir; // pointer ke directory
-    struct dirent *ent; // pointer ke file/directory
+    DIR *dir;                                                                           // pointer ke directory
+    struct dirent *ent;                                                                 // pointer ke file/directory
     const char *ori_path = "/home/hilmifawwaz/sisop/praktikum-modul-2-d04/task-2/task"; // path asal
-    int num_tasks = 0; // counter task
-    int num_files = 0; // counter file
-    char file_names[100][PATH_MAX]; // array untuk menyimpan nama file
+    int num_tasks = 0;                                                                  // counter task
+    int num_files = 0;                                                                  // counter file
+    char file_names[100][PATH_MAX];                                                     // array untuk menyimpan nama file
 
     // membuka directory
     if ((dir = opendir(ori_path)) != NULL)
@@ -311,19 +311,23 @@ void work_task_yuan(const char *yuan_path)
 
                 // proses penaaman directory dari nama file
                 char *file_name = strtok(file_names[i], "."); // memisahkan nama file dengan ekstensi
-                char *underscore = strchr(file_name, '_'); // mencari underscore pertama pada nama file
+                char *underscore = strchr(file_name, '_');    // mencari underscore pertama pada nama file
                 if (underscore != NULL)
                 {
                     char *second_underscore = strchr(underscore + 1, '_'); // mencari underscore kedua pada nama file
                     if (second_underscore != NULL)
                     {
-                        *second_underscore = '\0'; // mengganti underscore kedua dengan null character
+                        *second_underscore = '\0';
                     }
+                }
+                if (underscore != NULL)
+                {
+                    memmove(underscore, underscore + 1, strlen(underscore)); // menghapus underscore pertama
                 }
                 snprintf(dir_name, sizeof(dir_name), "%s", file_name); // menyimpan nama directory
                 char dir_path[PATH_MAX];
                 snprintf(dir_path, sizeof(dir_path), "%s/%s", yuan_path, dir_name); // membangun full path directory dengan menggabungkan path Yuan dan nama directory
-                create_directory(dir_path); // membuat directory
+                create_directory(dir_path);                                         // membuat directory
 
                 pid_t pid;
                 pid = fork();
@@ -335,11 +339,11 @@ void work_task_yuan(const char *yuan_path)
                     {
                         char link[200];
                         snprintf(link, sizeof(link), "https://source.unsplash.com/random/%s/?%s", resolution, categorie); // membuat link download gambar
-                        
-                        char filename[5000]; // array untuk menyimpan nama file gambar
-                        snprintf(filename, sizeof(filename), "%s/gambar%d.png", dir_path, i); // membangun full path file gambar
+
+                        char filename[5000];                                                                 // array untuk menyimpan nama file gambar
+                        snprintf(filename, sizeof(filename), "%s/gambar%d.png", dir_path, i);                // membangun full path file gambar
                         char *argv[] = {"wget", "-q", "--no-check-certificate", link, "-O", filename, NULL}; // array argumen untuk wget
-                        
+
                         pid_t pid;
                         pid = fork();
 
@@ -400,16 +404,16 @@ void work_task_yuan(const char *yuan_path)
                 // memindahkan file ke directory yang ditentukan
                 char new_file_path[PATH_MAX];
                 snprintf(new_file_path, sizeof(new_file_path), "%s/%s", yuan_path, file_names[i]); // membangun full path file tujuan
-                
+
                 // cek apakah file berhasil dipindahkan
                 if (rename(full_path, new_file_path) != 0)
                 {
                     // jika file adalah directory, maka gunakan command "mv" untuk memindahkan
                     // EISDIR adalah error code untuk menandakan bahwa file adalah directory
-                    if (errno == EISDIR) 
+                    if (errno == EISDIR)
                     {
                         char *arguments[] = {"mv", full_path, new_file_path, NULL}; // array argumen untuk mv
-                        
+
                         pid_t pid;
                         pid = fork();
 
@@ -449,11 +453,11 @@ void work_task_yuan(const char *yuan_path)
                     }
                 }
 
-                fclose(fp); // menutup file
+                fclose(fp);  // menutup file
                 num_tasks++; // increment counter task
 
                 // merekap data ke file recap.txt
-                recap_data("Yuan", file_name, count, categorie, resolution); 
+                recap_data("Yuan", file_name, count, categorie, resolution);
             }
         }
     }
@@ -463,7 +467,7 @@ void *bubu(void *arg)
 {
     // membuat directory Bubu
     char *bubu_path = "/home/hilmifawwaz/sisop/praktikum-modul-2-d04/task-2/task/Bubu";
-    
+
     // cek apakah directory sudah ada
     if (access(bubu_path, F_OK) == -1)
     {
@@ -485,12 +489,12 @@ void *bubu(void *arg)
 
 void work_task_bubu(const char *bubu_path)
 {
-    DIR *dir; // pointer ke directory
-    struct dirent *ent; // pointer ke file/directory
+    DIR *dir;                                                                           // pointer ke directory
+    struct dirent *ent;                                                                 // pointer ke file/directory
     const char *ori_path = "/home/hilmifawwaz/sisop/praktikum-modul-2-d04/task-2/task"; // path asal
-    int num_tasks = 0; // counter task
-    int num_files = 0; // counter file
-    char file_names[100][PATH_MAX]; // array untuk menyimpan nama file
+    int num_tasks = 0;                                                                  // counter task
+    int num_files = 0;                                                                  // counter file
+    char file_names[100][PATH_MAX];                                                     // array untuk menyimpan nama file
 
     // membuka directory
     if ((dir = opendir(ori_path)) != NULL)
@@ -556,12 +560,12 @@ void work_task_bubu(const char *bubu_path)
             else
             {
                 // membaca dan memproses isi file
-                int count; // counter jumlah gambar yang akan didownload
+                int count;           // counter jumlah gambar yang akan didownload
                 char resolution[20]; // resolusi gambar
                 char categorie[100]; // kategori gambar
 
                 fscanf(fp, "%d %s %[^\n]", &count, resolution, categorie); // membaca isi file
-                
+
                 printf("Count: %d\n", count);
                 printf("Resolution: %s\n", resolution);
                 printf("Categorie: %s\n", categorie);
@@ -571,19 +575,24 @@ void work_task_bubu(const char *bubu_path)
 
                 // proses penaaman directory dari nama file
                 char *file_name = strtok(file_names[i], "."); // memisahkan nama file dengan ekstensi
-                char *underscore = strchr(file_name, '_'); // mencari underscore pertama pada nama file
+                char *underscore = strchr(file_name, '_');    // mencari underscore pertama pada nama file
                 if (underscore != NULL)
                 {
                     char *second_underscore = strchr(underscore + 1, '_'); // mencari underscore kedua pada nama file
                     if (second_underscore != NULL)
                     {
-                        *second_underscore = '\0'; // mengganti underscore kedua dengan null character
+                        *second_underscore = '\0';
                     }
                 }
+                if (underscore != NULL)
+                {
+                    memmove(underscore, underscore + 1, strlen(underscore)); // menghapus underscore pertama
+                }
+                
                 snprintf(dir_name, sizeof(dir_name), "%s", file_name); // menyimpan nama directory
                 char dir_path[PATH_MAX];
                 snprintf(dir_path, sizeof(dir_path), "%s/%s", bubu_path, dir_name); // membangun full path directory dengan menggabungkan path Bubu dan nama directory
-                create_directory(dir_path); // membuat directory
+                create_directory(dir_path);                                         // membuat directory
 
                 pid_t pid;
                 pid = fork();
@@ -595,14 +604,14 @@ void work_task_bubu(const char *bubu_path)
                     {
                         char link[200];
                         snprintf(link, sizeof(link), "https://source.unsplash.com/random/%s/?%s", resolution, categorie); // membuat link download gambar
-                        
-                        char filename[5000]; // array untuk menyimpan nama file gambar
-                        snprintf(filename, sizeof(filename), "%s/gambar%d.png", dir_path, i); // membangun full path file gambar
+
+                        char filename[5000];                                                                 // array untuk menyimpan nama file gambar
+                        snprintf(filename, sizeof(filename), "%s/gambar%d.png", dir_path, i);                // membangun full path file gambar
                         char *argv[] = {"wget", "-q", "--no-check-certificate", link, "-O", filename, NULL}; // array argumen untuk wget
-                        
+
                         pid_t pid;
                         pid = fork();
-                        
+
                         if (pid == 0)
                         {
                             // child process: mengksekusi wget command
@@ -711,7 +720,7 @@ void work_task_bubu(const char *bubu_path)
                     }
                 }
 
-                fclose(fp); // menutup file
+                fclose(fp);  // menutup file
                 num_tasks++; // increment counter task
 
                 // merekap data ke file recap.txt
@@ -733,16 +742,16 @@ void recap_data(const char *name, const char *task, int count, const char *categ
     char task_name[100];
     strcpy(task_name, task);
     char *capital = strstr(task_name, "task"); // mencari kata "task" pada task_name
-    char *underscore = strchr(task_name, '_'); // mencari underscore pada task_name
-    if (underscore != NULL)
-    {
-        *underscore = ' ';
-    }
     if (capital != NULL)
     {
         *capital = 'T'; // mengganti huruf pertama dari "task" menjadi "T"
     }
     task_name[0] = toupper(task_name[0]); // mengubah huruf pertama menjadi huruf besar
+
+    // memisahkan angka dari kata "task"
+    char *number = task_name + 4; // mengambil angka setelah kata "task"
+    int num = atoi(number); // mengubah string angka menjadi integer
+    sprintf(task_name + 4, " %d", num); // menambahkan spasi dan angka setelah kata "Task"
 
     // menambahkan data ke file recap.txt
     FILE *file = fopen("recap.txt", "a");
@@ -849,13 +858,13 @@ void total_recap_data()
     fprintf(append_file, "summer: %d images\n", summer);
     fprintf(append_file, "minimalist: %d images\n", minimalist);
     fprintf(append_file, "face: %d images\n", face);
-    fprintf(append_file, "total images: %d images\n", total_images);
+    fprintf(append_file, "total images: %d images", total_images);
 
     fclose(append_file);
 }
 
 void finally()
-{   
+{
     // copy file recap.txt ke folder task
     char *copy_command[] = {"cp", "recap.txt", "task/", NULL};
 
@@ -930,7 +939,7 @@ void finally()
 int main()
 {
     // SOAL POIN A
-    char *url = "https://dl.dropboxusercontent.com/scl/fi/gmy0qvbysh3h7vdexso9k/task_sisop.zip?rlkey=ism9qfjh82awg2tbtzfbrylg4&dl=0";
+    char *url = "https://drive.google.com/uc?export=download&id=1CdWKLXVAc6P26sF-5oSrlVAsSExA1PQh";
     char *output_filename = "task_sisop.zip";
     char *path = "task";
     pthread_t yuan_thread, bubu_thread; // thread identifier
