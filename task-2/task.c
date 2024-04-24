@@ -7,6 +7,7 @@
 #include <time.h>
 #include <pthread.h>
 #include <ctype.h>
+#include <limits.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
@@ -20,7 +21,6 @@ void *yuan(void *arg);                                                          
 void *bubu(void *arg);                                                                                           // fungsi untuk thread bubu
 void work_task_yuan(const char *yuan_path);                                                                      // fungsi untuk task yuan
 void work_task_bubu(const char *bubu_path);                                                                      // fungsi untuk task bubu
-void work_task_download(const char *ori_path, struct dirent *ent, int count, char *resolution, char *categorie); // fungsi untuk download gambar
 void recap_data(const char *name, const char *task, int count, const char *categorie, const char *resolution);   // fungsi untuk merekap data
 void total_recap_data();                                                                                         // fungsi untuk merekap total data
 void finally();                                                                                                  // fungsi untuk menyelesaikan semua proses
@@ -237,7 +237,7 @@ void work_task_yuan(const char *yuan_path)
             // cek apakah nama file dimulai dengan "task_", jika iya maka lanjutkan
             if (strncmp(ent->d_name, "task_", 5) == 0)
             {
-                // mengambil nomor task dari nama file
+                // mengambil nomor task dari nama file 
                 int current_task_number = atoi(ent->d_name + 5);
 
                 // cek apakah nomor task berada di range 0-9, jika iya maka lanjutkan
