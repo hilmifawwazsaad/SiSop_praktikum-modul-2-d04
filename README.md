@@ -3261,7 +3261,7 @@ Dikarenakan penjelasan 4d ini sudah dijelaskan pada poin 4c, maka saya hanya mel
 
 ### Kendala
 
-Pada proses IPC antara program satu dengan program yang lain. Namun, akhirnya ketika revisi problem IPC tersebut bisa terselesaikan.
+Ketika praktikum, proses IPC antara program satu dengan program yang lain masih belum bisa (error). Akhirnya ketika revisi, problem IPC tersebut bisa terselesaikan dan task-4 solved
 
 <div align=center>
 
