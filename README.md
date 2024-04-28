@@ -28,7 +28,7 @@ Tulis laporan resmi di sini!
 _Write your lab work report here!_
 ## 1️⃣ Soal 1
 DJumanto adalah seorang pengembang hebat yang telah menciptakan banyak kode keren. Saat ini, ia ingin membuat sebuah proyek baru yang disebut "horsechamp", sebuah program untuk lomba balapan kuda bernama horsechamp.c. Program ini memiliki 4 fungsi utama, yaitu HorseFetcher, HorseRaceHooray, HorseChampionLeaderboard, dan Main.
-```bash
+```C
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -295,6 +295,14 @@ int main() {
     return 0;
 }
 ```
+_dokumentasi_
+![alt text](/resource/1a-1.png)
+![alt text](/resource/1a-2.png)
+![alt text](/resource/1a-3.png)
+![alt text](/resource/1a-4.png)
+![alt text](/resource/1a-5.png)
+![alt text](/resource/1a-6.png)
+![alt text](/resource/1a-7.png)
 
 
 
@@ -302,7 +310,7 @@ int main() {
 Buatlah fungsi HorseFetcher, yang bertugas mengambil data kuda dari internet dan menyimpannya dalam file dengan nama horse_1.txt, horse_2.txt, horse_3.txt, dan seterusnya. Kuda dan pemilik kuda dipisahkan dengan “:”, sebagai contoh “Morioh:DJumanto”, DJumanto adalah pemilik dari kuda Morioh.
 
 **Jawab**
-```bash
+```C
 void HorseFetcher() {
     int result = system("wget 'https://docs.google.com/uc?export=download&id=1gJkoTbiHZcJ1M36vqZPTrj3qTQkRMElQ' -O horses.zip");
     if (result != 0) {
@@ -320,14 +328,14 @@ void HorseFetcher() {
 HorseFetcher adalah fungsi yang mengunduh dan mengekstrak data kuda dari Google Drive menggunakan wget dan unzip. Jika ada kesalahan saat mengunduh atau mengekstrak, pesan kesalahan akan ditampilkan.
 
 - Perintah Pengunduhan
-```bash
+```C
 int result = system("wget 'https://docs.google.com/uc?export=download&id=1gJkoTbiHZcJ1M36vqZPTrj3qTQkRMElQ' -O horses.zip");
 ```
 system menjalankan perintah shell di dalam kode C. Di sini, fungsi wget digunakan untuk mengunduh file dari Google Drive. Opsi -O horses.zip mengarahkan output ke file bernama horses.zip.
 Hasil pengunduhan disimpan dalam variabel result. Jika result bernilai selain 0, itu menandakan bahwa perintah gagal.
 
 - Pemeriksaan Kesalahan Pengunduhan
-```bash
+```C
 if (result != 0) {
     fprintf(stderr, "Download failed.\n");
     return;
@@ -336,13 +344,13 @@ if (result != 0) {
 Pemeriksaan apakah perintah wget berhasil. Jika result bukan 0, berarti terjadi kesalahan saat mengunduh file. Dalam hal ini, fungsi menulis pesan kesalahan ke stderr dan keluar dari fungsi (return).
 
 - Bagian Perintah Ekstraksi
-```bash
+```C
 result = system("unzip -o horses.zip -d horse_files");
 ```
 Setelah unduhan berhasil, perintah unzip digunakan untuk mengekstrak file horses.zip ke direktori horse_files. Opsi -o digunakan untuk mengekstrak dan menimpa file yang ada jika diperlukan.
 
 - Bagian Perintah Ekstraksi
-```bash
+```C
 if (result != 0) {
     fprintf(stderr, "Unzip failed.\n");
     return;
@@ -351,13 +359,12 @@ if (result != 0) {
 Pemeriksaan apakah perintah unzip berhasil. Jika result bukan 0, berarti ada kesalahan saat mengekstrak file. Dalam hal ini, fungsi menulis pesan kesalahan ke stderr dan mengakhiri eksekusi dengan return.
 
 
-> [Format : Penjelasan (sesuaikan dengan style modul 1), Dokumentasi]
 
 ### Problem 1b
 Buatlah fungsi HorseRaceHooray, yang bertugas melakschildan balapan kuda. Parameter yang diguakan adalah salah satu file kuda yang telah kalian fetch sebelumnya. Gunakan thread untuk menjalankan perlombaan tersebut. Setiap kuda akan melakukan perhitungan bilangan prima dengan angka acak antara 1 sampai 4000. Kuda yang menyelesaikan perhitungan lebih awal akan menempati posisi lebih tinggi dari kuda lainnya. Setelah perlombaan selesai, simpan hasil lomba dalam format HorseRace_(nomor lomba).txt.
 
 - Fungsi HorseRaceHooray
-```bash
+```C
 void HorseRaceHooray() {
     DisplayHorseFiles();
     int choice;
@@ -440,7 +447,7 @@ void HorseRaceHooray() {
 HorseRaceHooray adalah fungsi untuk memulai perlombaan kuda. Pertama, ia menampilkan file data kuda yang tersedia dan meminta pengguna untuk memilih salah satunya. Jika tidak valid, ia menampilkan pesan kesalahan. Setelah valid, ia membuka file dan membaca informasi kuda ke dalam array HorseInfo. Setelah itu, ia mengacak array dan membuat thread untuk setiap kuda, menjalankan fungsi race_thread. Setelah semua thread selesai, ia menyimpan hasil perlombaan ke dalam file dan menampilkan pesan bahwa perlombaan selesai.
 
 - Bagian Meminta user memilih kuda
-```bash
+```C
     DisplayHorseFiles();  // Menampilkan daftar file kuda yang tersedia
     int choice;
     printf("Choose a number: ");  // Meminta pengguna memilih file data kuda
@@ -452,7 +459,7 @@ HorseRaceHooray adalah fungsi untuk memulai perlombaan kuda. Pertama, ia menampi
 Kode ini menampilkan file kuda yang tersedia menggunakan DisplayHorseFiles. Kemudian, meminta pengguna memilih nomor file kuda dengan scanf. Jika input tidak valid (mis. bukan angka atau kurang dari 1), program memberikan pesan kesalahan dan keluar dari fungsi.
 
 - Membuka File Data Kuda dan Membaca Isinya
-```bash
+```C
     char selected_horse[50];
     snprintf(selected_horse, sizeof(selected_horse), "horse_%d", choice);  // Menentukan nama file berdasarkan pilihan pengguna
 
@@ -476,7 +483,7 @@ Kode ini menampilkan file kuda yang tersedia menggunakan DisplayHorseFiles. Kemu
 Bagian ini menentukan nama file yang dipilih pengguna dan membuka file tersebut. Jika file tidak dapat dibuka, fungsi akan keluar. Jika file terbuka, program membaca informasi kuda ke dalam array HorseInfo hingga jumlah maksimal kuda atau akhir file.
 
 - Mengacak Data Kuda dan Memulai Thread Perlombaan
-```bash
+```C
     randomize_array(horses, horse_count);  // Mengacak data kuda agar urutan tidak selalu sama
 
     pthread_t threads[horse_count];  // Membuat array untuk menyimpan thread kuda
@@ -498,7 +505,7 @@ Bagian ini menentukan nama file yang dipilih pengguna dan membuka file tersebut.
 Bagian ini mengacak data kuda menggunakan randomize_array. Kemudian, membuat thread untuk setiap kuda yang menjalankan fungsi race_thread. Jika terjadi kesalahan saat membuat atau menggabungkan thread, pesan kesalahan ditampilkan dan fungsi keluar.
 
 - Menyimpan Hasil Perlombaan
-```bash
+```C
     char result_filename[200];
     int race_no = RACE_NUMBER;
 
@@ -537,14 +544,14 @@ Bagian ini menyimpan hasil perlombaan ke dalam file. Program membuat nama file h
 
 **Jawab**
 
-> [Format : Penjelasan (sesuaikan dengan style modul 1), Dokumentasi]
+
 
 ### Problem 1c
 Buatlah fungsi HorseChampionLeaderboard, yang bertugas menampilkan pemenang dari pertandingan-pertandingan sebelumnya. Berikan opsi kepada pengguna untuk memilih lomba mana yang ingin dilihat hasilnya.
 
 **Jawab**
 - Fungsi HorseChampionLeaderboard
-```bash
+```C
 void HorseChampionLeaderboard(const char *directory) {
     int choice;
     printf("Select Horse Race History:\n");
@@ -604,7 +611,7 @@ void HorseChampionLeaderboard(const char *directory) {
 ```
  
  - Pendahuluan
-```bash
+```C
 void HorseChampionLeaderboard(const char *directory) {
     int choice;
     printf("Select Horse Race History:\n");
@@ -614,7 +621,7 @@ int choice; mendefinisikan variabel untuk menampung pilihan pengguna.
 printf("Select Horse Race History:\n"); menampilkan prompt untuk meminta pengguna memilih riwayat perlombaan.
 
  - Membuka direktori dan menghitung file
-```bash
+```C
     DIR *dir = opendir(directory);
     if (dir == NULL) {
         perror("Failed to open directory.\n");
@@ -667,7 +674,7 @@ while ((entry = readdir(dir)) != NULL) { ... } membaca setiap entri dalam direkt
 if (strstr(entry->d_name, "HorseRace_") != NULL) { ... } memeriksa apakah nama file berisi "HorseRace_"; jika iya, menambah history_count dan mencetak nama file beserta indeksnya.
 
  - Bagian Validasi Pilihan Pengguna
-```bash
+```C
     if (history_count == 0) {
         printf("No history found.\n");
         closedir(dir);
@@ -690,7 +697,7 @@ if (scanf("%d", &choice) != 1 || choice < 1 || choice > history_count) { ... } m
 closedir(dir); menutup direktori setelah selesai.
 
  - Bagian Membuka File Riwayat dan Menampilkan Konten
-```bash
+```C
     char file_path[100];
     snprintf(file_path, sizeof(file_path), "%s/HorseRace_%d.txt", directory, choice);
 
@@ -716,19 +723,8 @@ closedir(dir); menutup direktori setelah selesai.
     fclose(file);
 }
 ```
-char file_path[100]; mendefinisikan variabel untuk menyimpan jalur file.
-snprintf(file_path, sizeof(file_path), "%s/HorseRace_%d.txt", directory, choice); membuat jalur file berdasarkan direktori dan pilihan pengguna.
-FILE *file = fopen(file_path, "r"); membuka file riwayat yang dipilih.
-if (file == NULL) { ... } memeriksa apakah file berhasil dibuka. Jika tidak, menampilkan pesan kesalahan dan keluar.
-printf("-----------------------------------------------------------------------\n"); mencetak pembatas visual untuk memisahkan output.
-printf("\n----HORSE CHAMPIONSHIP (%d)----\n", choice); mencetak header untuk bagian perlombaan yang dipilih.
-bool skip_first = true; mendefinisikan variabel untuk melewatkan baris pertama (yang mungkin berisi header).
-char line[500]; mendefinisikan buffer untuk membaca baris dari file.
-while (fgets(line, sizeof(line), file)) { ... } membaca setiap baris dalam file.
-if (skip_first) { ... } melewatkan baris pertama dan mengatur skip_first = false.
-printf("%s", line); mencetak isi baris yang dibaca dari file.
-fclose(file); menutup file setelah selesai membaca isinya.
-> [Format : Penjelasan (sesuaikan dengan style modul 1), Dokumentasi]
+
+
 
 ### Kendala
 
@@ -1923,7 +1919,7 @@ Kendala yang dialami ketika mengerjakan nomor 2 adalah kegagalan dalam mengurutk
 Rama adalah seorang mahasiswa yang mengambil mata kuliah Sistem Operasi. Ia diberikan proyek oleh dosennya untuk mengelola data cuaca dari berbagai kecamatan di Indonesia. Data tersebut tersedia dalam file zip yang bisa didownload disini. Karena suka tantangan, Rama melakukan analisis dengan menggunakan process di linux. Bantulah Rama untuk menyelesaikan tugas ini dengan satu program C bernama weather_manager.c.
 
 **Jawab**
-```bash
+```C
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -2120,12 +2116,13 @@ int main() {
     return 0;
 }
 ```
+
 ### Problem 3a
 Rama harus mendownload dan menyimpan file tersebut ke dalam penyimpanan lokal dan mengekstrak data cuaca tersebut pada folder yang bernama “weather”. Untuk menghemat memori Rama menghapus file zip tersebut.
 
 **Jawab**
 
-```bash
+```C
 
 int main() {
     pid_t pid;  // Tipe data untuk menyimpan ID proses
@@ -2169,7 +2166,7 @@ int main() {
 
 - Inisialisasi Variabel dan Fork Pertama
 
-```bash
+```C
 pid_t pid;  // Tipe data untuk menyimpan ID proses
 int status;  // Variabel untuk memantau status proses child
 
@@ -2182,7 +2179,7 @@ if (pid < 0) {  // Jika fork gagal
 Di bagian ini, program membuat proses baru (child) menggunakan fungsi fork(). Jika fork() gagal, akan ditampilkan pesan kesalahan dan program keluar dengan EXIT_FAILURE. Jika berhasil, variabel pid akan mengandung ID proses child.
 
  - Proses child pertama
- ```bash
+ ```C
     else if (pid == 0) {  // Jika ini proses child
     execlp("wget", "wget", "-O", ZIP_FILE, "https://drive.google.com/uc?export=download&id=1U1-9v9pJeX5MoofwoBHCcD9nA7YWy_np", NULL);  // Unduh file zip
     perror("Error in execlp");  // Tampilkan pesan kesalahan jika gagal
@@ -2192,7 +2189,7 @@ Di bagian ini, program membuat proses baru (child) menggunakan fungsi fork(). Ji
  Jika pid adalah 0, berarti ini adalah proses child. Dalam kasus ini, program akan menjalankan execlp untuk mengunduh file dari URL yang diberikan menggunakan wget. Jika execlp gagal, akan ditampilkan pesan kesalahan, dan proses child keluar dengan EXIT_FAILURE.
 
 - Proses Parent Menunggu Child Pertama
-```bash 
+```C 
     else {  // Jika ini adalah proses parent
     wait(&status);  // Tunggu proses child selesai
     if (WIFEXITED(status) && !WEXITSTATUS(status)) {  // Jika child berhasil
@@ -2201,7 +2198,7 @@ Di bagian ini, program membuat proses baru (child) menggunakan fungsi fork(). Ji
 Jika pid bukan 0, berarti ini adalah proses parent. Proses parent menggunakan wait(&status) untuk menunggu proses child selesai. Jika child berhasil (diperiksa dengan WIFEXITED(status) dan !WEXITSTATUS(status)), akan dicatat log bahwa pengunduhan berhasil.
 
 - Fork Kedua dan Proses Child Kedua
-```bash 
+```C 
 pid = fork();  // Buat proses child baru
 if (pid < 0) {  // Jika fork gagal
     perror("Error in fork");  // Tampilkan pesan kesalahan jika gagal
@@ -2216,7 +2213,7 @@ if (pid < 0) {  // Jika fork gagal
 Setelah pengunduhan berhasil, parent membuat child baru untuk mengekstrak file zip. Seperti sebelumnya, jika fork() gagal, program keluar dengan pesan kesalahan. Jika berhasil dan ini adalah proses child, execlp digunakan untuk menjalankan perintah unzip. Jika gagal, akan ada pesan kesalahan, dan proses child keluar.
 
 - Parent Menunggu Child Kedua dan Tindakan Setelah Ekstraksi
-```bash 
+```C 
 else {  // Jika ini adalah proses parent
     wait(&status);  // Tunggu proses child selesai
     if (WIFEXITED(status) && !WEXITSTATUS(status)) {  // Jika child berhasil
@@ -2229,9 +2226,10 @@ else {  // Jika ini adalah proses parent
 ```
 Jika proses parent, ini akan menunggu proses child kedua selesai. Jika proses child kedua berhasil, file zip yang diekstrak akan dihapus dengan remove(ZIP_FILE). Log juga dicatat untuk menunjukkan keberhasilan ekstraksi. Setelah itu, fungsi preprocessing() dijalankan untuk melakukan pemrosesan data dan grouping() untuk pengelompokan data.
 
+_Dokumentasi_
+![alt text](/resource/3a-1.png)
 
 
-> [Format : Penjelasan (sesuaikan dengan style modul 1), Dokumentasi]
 
 ### Problem 3b
 Setelah berhasil, Rama melakukan data preprocessing dengan cara mencari data yang tidak masuk akal pada kolom “Suhu Udara” dan melakukan drop pada row tersebut. Lalu update dataset “kecamatanforecast.csv”.
@@ -2239,7 +2237,7 @@ Setelah berhasil, Rama melakukan data preprocessing dengan cara mencari data yan
 **Jawab**
 
 
- - ```bash
+ - ```C
     void preprocessing() {
     FILE *input_file = fopen("weather/kecamatanforecast.csv", "r");  // Buka file input
     FILE *temp_file = fopen("weather/kecamatanforecast_temp.csv", "w");  // Buka file sementara
@@ -2299,7 +2297,7 @@ Setelah berhasil, Rama melakukan data preprocessing dengan cara mencari data yan
 }
 
  - Bagian pembuka file
-```bash 
+```C 
 FILE *input_file = fopen("weather/kecamatanforecast.csv", "r");  // Buka file input
 FILE *temp_file = fopen("weather/kecamatanforecast_temp.csv", "w");  // Buka file sementara
 if (input_file == NULL atau temp_file == NULL) {
@@ -2310,7 +2308,7 @@ if (input_file == NULL atau temp_file == NULL) {
 Bagian ini membuka file CSV yang ingin diproses dan file sementara untuk menyimpan hasil pemrosesan. Jika salah satu file tidak dapat dibuka, program akan menampilkan pesan kesalahan dan berhenti.
 
  - Bagian Membaca dan Menulis Header
-```bash 
+```C 
 char line[512];  // Buffer untuk membaca baris
 fgets(line, sizeof(line), input_file);  // Baca baris pertama (header)
 fputs(line, temp_file);  // Tulis baris header ke file sementara
@@ -2319,7 +2317,7 @@ Bagian ini membaca baris pertama dari file CSV yang biasanya adalah header, dan 
 
 
  - Bagian pemrosesan baris
-```bash 
+```C 
 while (fgets(line, sizeof(line), input_file)) {  // Baca setiap baris dari file input
     char temp_line[512];  // Buffer untuk menyimpan baris sementara
     strcpy(temp_line, line);  // Buat salinan sementara dari baris
@@ -2336,7 +2334,7 @@ Bagian ini memulai loop untuk membaca setiap baris dari file input. Baris pertam
 
 
  - Bagian ekstraksi dan penyaringan data
-```bash 
+```C 
     while (token != NULL) {  // Iterasi melalui setiap token
         char *newline = strchr(token, '\n');  // Hapus karakter newline jika ada
         if (newline != NULL) {
@@ -2372,7 +2370,7 @@ Bagian ini mengambil setiap baris yang dibaca dan mengekstrak nilai kolom ke-4 (
 
 
  - Bagian penyelesaian pemrosesan
-```bash 
+```C 
 fclose(input_file);  // Tutup file input
 fclose(temp_file);  // Tutup file sementara
 
@@ -2383,16 +2381,17 @@ logbook("Data preprocessing completed.");  // Catat log selesai pemrosesan
 
 ```
 Bagian ini menutup file input dan file sementara. Setelah pemrosesan selesai, file input lama dihapus dan file sementara diganti namanya menjadi file asli. Setelah semua langkah selesai, pesan log dicatat untuk mencatat bahwa pemrosesan data telah selesai.
+_Dokumentasi_
+![alt text](/resource/3b-1.png)
 
 
-> [Format : Penjelasan (sesuaikan dengan style modul 1), Dokumentasi]
 
 ### Problem 3c
 Kemudian dari dataset tersebut, Rama mengelompokkannya berdasarkan ID Lokasi dan memisahkannya menjadi dataset baru dengan format nama “city_{ID Lokasi}” contoh “city_5012725.csv”. Semua dataset baru tersebut dimasukan ke dalam folder bernama “city_group”.
 
 **Jawab**
 
-```bash
+```C
 void grouping() {
     mkdir("city_group", 0777);  // Buat folder "city_group" jika belum ada
 
@@ -2447,13 +2446,13 @@ void grouping() {
 ```
 
 - Pembuatan Folder city_group
-```bash 
+```C 
 mkdir("city_group", 0777);  // Buat folder "city_group" jika belum ada
 ```
 Pada bagian ini, folder bernama city_group dibuat dengan izin 0777, yang berarti folder tersebut dapat diakses dan dimodifikasi oleh semua pengguna. Jika folder sudah ada, mkdir tidak akan membuat yang baru.
 
 - Membuka File Input
-```bash 
+```C 
 FILE *input_file = fopen("weather/kecamatanforecast.csv", "r");  // Buka file input
 if (input_file == NULL) {
     perror("Error opening input file");  // Tampilkan pesan kesalahan jika gagal
@@ -2464,20 +2463,20 @@ Bagian ini membuka file CSV yang berisi data cuaca. Jika file tidak ditemukan at
 
 
 - Membaca Header File CSV
-```bash 
+```C 
 char line[512];  // Buffer untuk membaca baris
 fgets(line, sizeof(line), input_file);  // Baca dan abaikan baris header
 ```
 Bagian ini membaca baris pertama (header) dari file CSV dan mengabaikannya. Buffer line digunakan untuk menyimpan baris yang dibaca.
 
 - Inisialisasi Array Penunjuk File
-```bash 
+```C 
 FILE *file_map[10000] = {NULL};  // Array untuk menyimpan penunjuk file berdasarkan indeks loc_id
 ```
 Bagian ini menginisialisasi array yang akan menyimpan penunjuk file berdasarkan indeks loc_id. Indeks didasarkan pada nilai loc_id yang akan dihitung kemudian.
 
 - Pengelompokan Data Berdasarkan loc_id
-```bash 
+```C 
 while (fgets(line, sizeof(line), input_file)) {  // Baca setiap baris dari file input
     if (strlen(line) > 0) {  // Jika baris tidak kosong
         char temp_line[sizeof(line)];
@@ -2509,7 +2508,7 @@ Bagian ini membaca setiap baris dari file CSV. Jika baris tidak kosong, ia menya
 Jika file untuk indeks tersebut belum ada, maka file baru dibuat di dalam folder city_group dengan nama berdasarkan loc_id. Jika file gagal dibuka, kesalahan ditampilkan dan iterasi dilanjutkan ke baris berikutnya. Jika file berhasil dibuka, header standar ditulis ke file tersebut. Baris kemudian ditulis ke file yang sesuai berdasarkan indeks.
 
 - Penutupan File dan Logging
-```bash 
+```C 
 // Tutup semua file yang dibuka
 for (int i = 0; i < 10000; i++) {
     if (file_map[i]) {
@@ -2524,14 +2523,15 @@ logbook("Successfully grouped data.\n");  // Catat log selesai pengelompokan
 ```
 Bagian ini menutup semua file yang telah dibuka untuk menghindari kebocoran memori dan file yang terbuka. Penutupan dilakukan dengan iterasi melalui seluruh array file_map dan menutup file jika tidak NULL. Setelah itu, file input juga ditutup. Terakhir, pesan log dicatat untuk menandai bahwa pengelompokan telah berhasil dilakukan.
 
-> [Format : Penjelasan (sesuaikan dengan style modul 1), Dokumentasi]
+_Dokumentasi_
+![alt text](/resource/3c-1.png)
 
 ### Problem 3d
 Rama harus membuat logbook untuk laporan kepada dosen, sehingga semua activities diatas harus disimpan dalam “logbook.txt” dengan format { [YYYY-MM-dd HH:mm:ss] [message]}.
 
 **Jawab**
 
-```bash
+```C
 void logbook(const char *message) {
     time_t current_time;
     struct tm *timeinfo;
@@ -2553,7 +2553,7 @@ void logbook(const char *message) {
 ```
 
 - Menginisiasi Variabel dan Mendapatkan Waktu Saat Ini
-```bash 
+```C 
 time_t current_time;  // Menyimpan waktu saat ini dalam format time_t
 struct tm *timeinfo;  // Menyimpan informasi waktu yang terstruktur
 char timestamp[80];  // Buffer untuk menyimpan stempel waktu
@@ -2564,14 +2564,14 @@ timeinfo = localtime(&current_time);  // Mengkonversi waktu ke waktu lokal yang 
 Pada bagian ini, variabel yang diperlukan untuk mencatat waktu dan stempel waktu diinisiasi. time(&current_time) digunakan untuk mendapatkan waktu saat ini dalam format time_t, dan localtime(&current_time) mengkonversi waktu tersebut ke struktur waktu lokal yang lebih mudah dimanipulasi.
 
 - Penutupan File dan Logging
-```bash 
+```C 
 strftime(timestamp, sizeof(timestamp), "[%Y-%m-%d %H:%M:%S]", timeinfo);  // Format stempel waktu
 
 ```
 Stempel waktu dibuat menggunakan strftime. Ini mengubah waktu yang terstruktur menjadi string yang diformat sesuai dengan pola yang diberikan. Pola yang digunakan di sini adalah [tahun-bulan-hari jam:menit:detik], sehingga memberikan waktu yang dapat dibaca.
 
 - Membuka File Log untuk Penambahan
-```bash 
+```C 
 FILE *log_file = fopen(LOG_FILE, "a");  // Buka file log dalam mode penambahan
 if (log_file == NULL) {
     perror("Error opening log file");  // Tampilkan pesan kesalahan jika file gagal dibuka
@@ -2583,17 +2583,18 @@ Di bagian ini, file log dibuka dalam mode penambahan dengan fopen(LOG_FILE, "a")
 
 - Menulis Pesan Log dan Menutup File
 
-```bash 
+```C 
 fprintf(log_file, LOG_FORMAT, timestamp, message);  // Tulis pesan log dengan stempel waktu
 fclose(log_file);  // Tutup file log
 ```
 Bagian ini menulis pesan log ke dalam file dengan format yang sudah ditentukan, termasuk stempel waktu dan pesan yang diterima sebagai argumen. fprintf digunakan untuk menulis ke file dengan format tertentu. Setelah pesan ditulis, file ditutup menggunakan fclose untuk memastikan semua data disimpan dengan benar dan untuk mencegah kebocoran sumber daya.
 
+_Dokumentasi_
+![alt text](/resource/3d-1.png)
 
 
 
 
-> [Format : Penjelasan (sesuaikan dengan style modul 1), Dokumentasi]
 
 ### Kendala
 
@@ -2606,28 +2607,28 @@ Pengguna dapat memilih tipe pemain (‘X’ atau ‘O’) berdasarkan perintah d
 
 **Jawab**
 
-> [Format : Penjelasan (sesuaikan dengan style modul 1), Dokumentasi]
+
 
 ### Problem 4b
 Karena berjalan di terminal, program ini menggunakan nomor kotak (1-9) yang berurutan dari kiri atas ke kanan bawah untuk memudahkan pemilihan kotak. Program 'player.c' akan menampilkan kotak tic tac toe saat ini dan meminta input pengguna berupa nomor kotak sesuai gilirannya (player 'X' memulai terlebih dahulu). Input yang diberikan pengguna kemudian dikirimkan ke 'game.c' menggunakan message queue.
 
 **Jawab**
 
-> [Format : Penjelasan (sesuaikan dengan style modul 1), Dokumentasi]
+
 
 ### Problem 4c
 Selanjutnya, ‘game.c’ harus mengecek apakah input user sesuai atau tidak berdasarkan nilai kotak permainan saat ini. Kirimkan pesan error kepada pengguna jika nomor kotak yang dipilih tidak kosong atau diluar angka 1-9. Pesan dapat dikirimkan melalui message queue dengan ‘mesg_type’ yang berbeda.
 
 **Jawab**
 
-> [Format : Penjelasan (sesuaikan dengan style modul 1), Dokumentasi]
+
 
 ### Problem 4d
 Jika input valid, ‘game.c’ perlu mengubah nilai pada kotak tic-tac-toe dan memutuskan apakah permainan telah selesai atau masih berlanjut. Permainan telah selesai jika kotak telah terisi semua (seri) atau terdapat simbol (‘X’ atau ‘O’) yang membentuk garis vertikal, horizontal, maupun diagonal. Kotak tic tac toe yang telah diperbarui dan hasil akhir permainan (jika sudah berakhir) dikirimkan ke 'player.c' untuk kemudian ditampilkan kepada pengguna.
 
 **Jawab**
 
-> [Format : Penjelasan (sesuaikan dengan style modul 1), Dokumentasi]
+
 
 ### Kendala
 

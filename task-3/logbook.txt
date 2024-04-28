@@ -1197,3 +1197,21 @@
 [[2024-04-19 09:42:03]] Data preprocessing completed.
 [[2024-04-19 09:42:43]] Successfully grouped data.
 
+[[2024-04-28 14:26:55]] Successfully download file..
+[[2024-04-28 14:26:58]] Successfully unzip file..
+[[2024-04-28 14:26:58]] Successfully drop row with parameter 5012832 value 87
+[[2024-04-28 14:26:58]] Successfully drop row with parameter 5012832 value 87
+[[2024-04-28 14:26:58]] Successfully drop row with parameter 5009257 value 111
+[[2024-04-28 14:26:58]] Successfully drop row with parameter 5009257 value 87
+[[2024-04-28 14:26:58]] Successfully drop row with parameter 5009258 value 111
+[[2024-04-28 14:26:58]] Successfully drop row with parameter 5009259 value 101
+[[2024-04-28 14:26:58]] Successfully drop row with parameter 5009260 value 45
+[[2024-04-28 14:26:58]] Successfully drop row with parameter 5002228 value 87
+[[2024-04-28 14:26:58]] Successfully drop row with parameter 5011805 value 98
+[[2024-04-28 14:26:58]] Successfully drop row with parameter 5011793 value 56
+[[2024-04-28 14:26:58]] Successfully drop row with parameter 5011791 value 56
+[[2024-04-28 14:26:58]] Successfully drop row with parameter 5011791 value 56
+[[2024-04-28 14:26:58]] Successfully drop row with parameter 5011791 value 65
+[[2024-04-28 14:26:58]] Data preprocessing completed.
+[[2024-04-28 14:27:43]] Successfully grouped data.
+
