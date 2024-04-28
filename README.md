@@ -304,8 +304,6 @@ _dokumentasi_
 ![alt text](/resource/1a-6.png)
 ![alt text](/resource/1a-7.png)
 
-
-
 ### Problem 1a
 Buatlah fungsi HorseFetcher, yang bertugas mengambil data kuda dari internet dan menyimpannya dalam file dengan nama horse_1.txt, horse_2.txt, horse_3.txt, dan seterusnya. Kuda dan pemilik kuda dipisahkan dengan “:”, sebagai contoh “Morioh:DJumanto”, DJumanto adalah pemilik dari kuda Morioh.
 
@@ -358,10 +356,10 @@ if (result != 0) {
 ```
 Pemeriksaan apakah perintah unzip berhasil. Jika result bukan 0, berarti ada kesalahan saat mengekstrak file. Dalam hal ini, fungsi menulis pesan kesalahan ke stderr dan mengakhiri eksekusi dengan return.
 
-
-
 ### Problem 1b
 Buatlah fungsi HorseRaceHooray, yang bertugas melakschildan balapan kuda. Parameter yang diguakan adalah salah satu file kuda yang telah kalian fetch sebelumnya. Gunakan thread untuk menjalankan perlombaan tersebut. Setiap kuda akan melakukan perhitungan bilangan prima dengan angka acak antara 1 sampai 4000. Kuda yang menyelesaikan perhitungan lebih awal akan menempati posisi lebih tinggi dari kuda lainnya. Setelah perlombaan selesai, simpan hasil lomba dalam format HorseRace_(nomor lomba).txt.
+
+**Jawab**
 
 - Fungsi HorseRaceHooray
 ```C
@@ -542,10 +540,6 @@ Bagian ini mengacak data kuda menggunakan randomize_array. Kemudian, membuat thr
 ```
 Bagian ini menyimpan hasil perlombaan ke dalam file. Program membuat nama file hasil perlombaan berdasarkan nomor perlombaan. Jika nama sudah ada, nomor ditingkatkan dan memeriksa lagi. Setelah menentukan nama file, hasil ditulis ke file, termasuk informasi dasar, tanggal, waktu, dan hasil setiap kuda. Jika terjadi kesalahan saat membuka file, program keluar dengan pesan kesalahan. Setelah selesai, program menutup file dan menampilkan pesan bahwa perlombaan telah selesai.
 
-**Jawab**
-
-
-
 ### Problem 1c
 Buatlah fungsi HorseChampionLeaderboard, yang bertugas menampilkan pemenang dari pertandingan-pertandingan sebelumnya. Berikan opsi kepada pengguna untuk memilih lomba mana yang ingin dilihat hasilnya.
 
@@ -567,7 +561,7 @@ void HorseChampionLeaderboard(const char *directory) {
     while ((entry = readdir(dir)) != NULL) {
         if (strstr(entry->d_name, "HorseRace_") != NULL) {
             history_count++;
-            printf("%d. %s\n", history_count, entry's name);
+            printf("%d. %s\n", history_count, entry->d_name);
         }
     }
 
@@ -578,11 +572,13 @@ void HorseChampionLeaderboard(const char *directory) {
     }
 
     printf("Enter number: ");
-    if (scanf("%d", &choice) != 1 atau choice < 1 atau choice > history_count) {
+    if (scanf("%d", &choice) != 1 || choice < 1 || choice > history_count) {
         printf("Invalid choice.\n");
         closedir(dir);
         return;
     }
+
+    closedir(dir);
 
     char file_path[100];
     snprintf(file_path, sizeof(file_path), "%s/HorseRace_%d.txt", directory, choice);
@@ -609,8 +605,8 @@ void HorseChampionLeaderboard(const char *directory) {
     fclose(file);
 }
 ```
- 
- - Pendahuluan
+Penjelasan mendetail dari kode fungsi HorseChampionLeaderboard ini akan dilakukan per bagian untuk memberikan konteks dan pemahaman yang lebih jelas.
+- Pendahuluan
 ```C
 void HorseChampionLeaderboard(const char *directory) {
     int choice;
@@ -637,35 +633,6 @@ printf("Select Horse Race History:\n"); menampilkan prompt untuk meminta penggun
         }
     }
 ```
-
-Penjelasan mendetail dari kode fungsi HorseChampionLeaderboard ini akan dilakukan per bagian untuk memberikan konteks dan pemahaman yang lebih jelas.
-
-Pendahuluan
-c
-Copy code
-void HorseChampionLeaderboard(const char *directory) {
-    int choice;
-    printf("Select Horse Race History:\n");
-Fungsi HorseChampionLeaderboard bertugas untuk menampilkan riwayat perlombaan kuda dari direktori yang diberikan. Parameter directory adalah nama direktori di mana file riwayat disimpan.
-int choice; mendefinisikan variabel untuk menampung pilihan pengguna.
-printf("Select Horse Race History:\n"); menampilkan prompt untuk meminta pengguna memilih riwayat perlombaan.
-Membuka Direktori dan Menghitung File
-c
-Copy code
-    DIR *dir = opendir(directory);
-    if (dir == NULL) {
-        perror("Failed to open directory.\n");
-        return;
-    }
-
-    struct dirent *entry;
-    int history_count = 0;
-    while ((entry = readdir(dir)) != NULL) {
-        if (strstr(entry->d_name, "HorseRace_") != NULL) {
-            history_count++;
-            printf("%d. %s\n", history_count, entry->d_name);
-        }
-    }
 DIR *dir = opendir(directory); mencoba membuka direktori yang diberikan.
 if (dir == NULL) { ... } memeriksa apakah direktori berhasil dibuka; jika gagal, fungsi menampilkan pesan kesalahan dan keluar.
 struct dirent *entry; mendefinisikan variabel untuk membaca entri direktori.
@@ -673,7 +640,7 @@ int history_count = 0; menginisialisasi penghitung file riwayat.
 while ((entry = readdir(dir)) != NULL) { ... } membaca setiap entri dalam direktori.
 if (strstr(entry->d_name, "HorseRace_") != NULL) { ... } memeriksa apakah nama file berisi "HorseRace_"; jika iya, menambah history_count dan mencetak nama file beserta indeksnya.
 
- - Bagian Validasi Pilihan Pengguna
+- Bagian Validasi Pilihan Pengguna
 ```C
     if (history_count == 0) {
         printf("No history found.\n");
@@ -689,14 +656,14 @@ if (strstr(entry->d_name, "HorseRace_") != NULL) { ... } memeriksa apakah nama f
     }
 
     closedir(dir);
-
+}
 ```
 if (history_count == 0) { ... } memeriksa apakah ada file riwayat yang ditemukan. Jika tidak ada, fungsi menampilkan pesan bahwa tidak ada riwayat dan menutup direktori.
 printf("Enter number: "); meminta pengguna memilih nomor file riwayat.
 if (scanf("%d", &choice) != 1 || choice < 1 || choice > history_count) { ... } memeriksa apakah input pengguna valid. Jika tidak, menampilkan pesan kesalahan dan keluar.
 closedir(dir); menutup direktori setelah selesai.
 
- - Bagian Membuka File Riwayat dan Menampilkan Konten
+- Bagian Membuka File Riwayat dan Menampilkan Konten
 ```C
     char file_path[100];
     snprintf(file_path, sizeof(file_path), "%s/HorseRace_%d.txt", directory, choice);
@@ -724,11 +691,9 @@ closedir(dir); menutup direktori setelah selesai.
 }
 ```
 
-
-
 ### Kendala
 
-> [Format : Penjelasan Kendala + Solusi (jika ada)]
+Waktu melihat hasil pemenang, teks tidak dapat terbaca, hanya menghasilkan simbol-simbol yang tidak dapat terbaca, kemudian sudah di fix sehingga hasilnya benar
 
 ## 2️⃣ Soal 2
 Yuan dan Bubu ditugaskan untuk mengunduh gambar oleh dosennya, namun dengan beberapa tantangan. Mereka diberikan satu folder yang berisikan file random. Dimana pada folder tersebut, terdapat beberapa file yang berisi petunjuk terkait gambar yang harus diunduh oleh Yuan dan Bubu.
@@ -2229,15 +2194,12 @@ Jika proses parent, ini akan menunggu proses child kedua selesai. Jika proses ch
 _Dokumentasi_
 ![alt text](/resource/3a-1.png)
 
-
-
 ### Problem 3b
 Setelah berhasil, Rama melakukan data preprocessing dengan cara mencari data yang tidak masuk akal pada kolom “Suhu Udara” dan melakukan drop pada row tersebut. Lalu update dataset “kecamatanforecast.csv”.
 
 **Jawab**
 
-
- - ```C
+```C
     void preprocessing() {
     FILE *input_file = fopen("weather/kecamatanforecast.csv", "r");  // Buka file input
     FILE *temp_file = fopen("weather/kecamatanforecast_temp.csv", "w");  // Buka file sementara
@@ -2295,6 +2257,7 @@ Setelah berhasil, Rama melakukan data preprocessing dengan cara mencari data yan
 
     logbook("Data preprocessing completed.");  // Catat log selesai pemrosesan
 }
+```
 
  - Bagian pembuka file
 ```C 
@@ -2363,13 +2326,10 @@ Bagian ini memulai loop untuk membaca setiap baris dari file input. Baris pertam
         logbook(log_message);  // Catat pesan log
     }
 }
-
 ```
 Bagian ini mengambil setiap baris yang dibaca dan mengekstrak nilai kolom ke-4 (suhu udara) dan kolom pertama (parameter udara). Jika suhu udara lebih dari 35 derajat, baris tersebut dihapus, dan pesan log dicatat untuk mencatat penghapusan ini. Jika suhu udara kurang dari atau sama dengan 35 derajat, baris tersebut ditulis ke file sementara.
 
-
-
- - Bagian penyelesaian pemrosesan
+- Bagian penyelesaian pemrosesan
 ```C 
 fclose(input_file);  // Tutup file input
 fclose(temp_file);  // Tutup file sementara
@@ -2381,6 +2341,7 @@ logbook("Data preprocessing completed.");  // Catat log selesai pemrosesan
 
 ```
 Bagian ini menutup file input dan file sementara. Setelah pemrosesan selesai, file input lama dihapus dan file sementara diganti namanya menjadi file asli. Setelah semua langkah selesai, pesan log dicatat untuk mencatat bahwa pemrosesan data telah selesai.
+
 _Dokumentasi_
 ![alt text](/resource/3b-1.png)
 
@@ -2566,7 +2527,6 @@ Pada bagian ini, variabel yang diperlukan untuk mencatat waktu dan stempel waktu
 - Penutupan File dan Logging
 ```C 
 strftime(timestamp, sizeof(timestamp), "[%Y-%m-%d %H:%M:%S]", timeinfo);  // Format stempel waktu
-
 ```
 Stempel waktu dibuat menggunakan strftime. Ini mengubah waktu yang terstruktur menjadi string yang diformat sesuai dengan pola yang diberikan. Pola yang digunakan di sini adalah [tahun-bulan-hari jam:menit:detik], sehingga memberikan waktu yang dapat dibaca.
 
@@ -2577,7 +2537,6 @@ if (log_file == NULL) {
     perror("Error opening log file");  // Tampilkan pesan kesalahan jika file gagal dibuka
     exit(EXIT_FAILURE);  // Keluar dari program jika gagal
 }
-
 ```
 Di bagian ini, file log dibuka dalam mode penambahan dengan fopen(LOG_FILE, "a"). Mode penambahan berarti data baru akan ditambahkan di akhir file tanpa menghapus data yang ada. Jika file tidak dapat dibuka, perror menampilkan pesan kesalahan, dan exit(EXIT_FAILURE) keluar dari program untuk mencegah kerusakan lebih lanjut.
 
@@ -2594,7 +2553,7 @@ _Dokumentasi_
 
 ### Kendala
 
-> [Format : Penjelasan Kendala + Solusi (jika ada)]
+Tidak ada ("-")
 
 ## 4️⃣ Soal 4
 Sebagai mahasiswa baru informatika, satria memiliki ide untuk membuat game tic-tac-toe yang berjalan di terminal. Tic-tac-toe merupakan permainan dengan 2 pemain yang secara bergantian menempatkan tanda 'X' atau 'O' hingga membentuk garis horizontal, vertikal, atau diagonal. Untuk membuat game ini, satria membutuhkan 2 program c, yaitu game.c dan player.c
