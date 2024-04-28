@@ -1320,7 +1320,7 @@ void work_task_yuan(const char *yuan_path)
 Untuk setiap file, akan dilakukan fork untuk melakukan download gambar menggunakan perintah `wget` dalam child process
 - Setelah download selesai, file akan dipindahkan ke direktori yang sesuai. Recap data juga dilakukan ke dalam file "recap.txt" melalui fungsi `recap_data`
 
-_4. Pada poin ini, saya hanya mengcopykan program saya karena memang program bubu mirip dengan program yuan. Yang membedakan hanya pada sorting pada fungsi `work_task_bubu` yang dilakukan secara descendung dari task_19 sampai task_10_
+_4. Pada poin ini, saya hanya mengcopykan program saya karena memang program bubu mirip dengan program yuan. Yang membedakan hanya pada sorting pada fungsi `work_task_bubu` yang dilakukan secara descending dari task_19 sampai task_10_
 ```C
 void *bubu(void *arg)
 {
@@ -2592,10 +2592,6 @@ Bagian ini menulis pesan log ke dalam file dengan format yang sudah ditentukan, 
 _Dokumentasi_
 ![alt text](/resource/3d-1.png)
 
-
-
-
-
 ### Kendala
 
 > [Format : Penjelasan Kendala + Solusi (jika ada)]
@@ -2607,32 +2603,665 @@ Pengguna dapat memilih tipe pemain (‘X’ atau ‘O’) berdasarkan perintah d
 
 **Jawab**
 
+_1. Sebelum menjalankan apa yang diminta soal, kita siapkan dahulu papan tic tac toe pada kedua program, yaitu player.c dan game.c_
+```C
+#define MAX_CHESSBOARD 3
 
+// variabel untuk papan permainan 3x3
+char (*papanPermainan)[MAX_CHESSBOARD];
+```
+- Mendefinisikan konstanta bernama `MAX_CHESSBOARD` dengan nilai 3 pada header. Konstanta ini akan digunakan untuk menentukan papan permainan tic tac toe berukuran 3x3
+- `char (*papanPermainan)[MAX_CHESSBOARD]` merupakan pointer ke array 2 dimensi dengan ukuran 3 baris dan 3 kolom
+
+_2. Membuat struct untuk menyimpan data pemain. Walaupun penamaan struct pada player.c dan game.c terlihat berbeda, semuanya memiliki kegunaan yang sama. Program pertama pada player.c dan program kedua pada game.c_
+```C
+// struct untuk menyimpan identitas pemain
+struct IdentitasPemain
+{
+    int jenis; // 1: X, 2: O
+    int jumlah; // jumlah pemain yang telah bergabung
+};
+```
+```C
+// menyimpan pemilihan pemain
+struct PemilihanPemain
+{
+    int pemain; // nomor pemain yang bergabung
+    int jumlah; // jumlah pemain yang sudah bergabung
+};
+```
+_3. Membuat fungsi untuk memeriksa pemilihan tipe/jenis pemain pada program player.c_
+```C
+int periksaPemain(int jenis, int memoriBersama)
+{
+    if (jenis == memoriBersama)
+    {
+        if (jenis == 1)
+        {
+            printf("Tipe pemain 'X' sudah dipilih, pilih jenis pemain lainnya\n");
+            return 1;
+        }
+        else if (jenis == 2)
+        {
+            printf("Tipe pemain 'O' sudah dipilih, pilih jenis pemain lainnya\n");
+            return 1;
+        }
+        else
+        {
+            printf("Masukkan tipe pemain yang valid!\n");
+            return 1;
+        }
+    }
+    else
+    {
+        if (jenis == 1 || jenis == 2)
+        {
+            return 0;
+        }
+        else
+        {
+            printf("Masukkan tipe pemain yang valid!\n");
+            return 1;
+        }
+    }
+    return 0;
+}
+```
+- Fungsi ini menerima 2 parameter, yaitu `jenis` yang merupakan jenis pemain yang diperiksa dan `memoriBersama` yang merupakan jenis pemain yang telah dipilih sebelumnya
+- Fungsi akan memeriksa apakah `jenis` sama dengan `memoriBersama`, jika iya makan akan mencetak pesan bahwa tipe pemain telah dipilih dan mengembalikan nilai 1.
+- Jika `jenis` adalah 1 atau 2, yang merupakan jenis pemain yang valid, fungsi akan mengembalikan nilai 0
+
+_4. Setelah membuat fungsi untuk mengecek tipe/jenis pemain, kita beralih pada Main Function program player.c_
+```C
+int main()
+{
+    int tipePemain;
+    char simbol;
+    int idMemori;
+    struct IdentitasPemain *pilihanPemain = (struct IdentitasPemain *)malloc(sizeof(struct IdentitasPemain)); // alokasi memori untuk menyimpan jenis pemain
+    idMemori = shmget((key_t)2121, 1024, 0666); // mendapatkan id memori bersama, memori 2121, 1024 byte, 0666 untuk permission (rw)
+    pilihanPemain = shmat(idMemori, NULL, 0); // menautkan memori bersama ke variabel pilihanPemain
+
+    do
+    {
+        printf("Jenis pemain yang tersedia:\n");
+        printf("1. X\n2. O\n");
+        printf("Pilih jenis Anda (1 atau 2): ");
+        scanf("%d", &tipePemain);
+    } while (periksaPemain(tipePemain, pilihanPemain->jenis));
+
+    pilihanPemain->jenis = tipePemain;
+    pilihanPemain->jumlah++;
+
+    printf("Menunggu pemain lain memilih jenis pemain...\n");
+
+    int idAntrian;
+    idAntrian = msgget((key_t)3030, IPC_CREAT | 0644); // mendapatkan id antrian pesan, key 3030, 0644 untuk permission
+
+    if (tipePemain == 1)
+    {
+        simbol = 'X';
+    }
+    else
+    {
+        simbol = 'O';
+    }
+
+    .....
+```
+- `tipePemain` untuk menyimpan jenis pemain yang dipilih oleh pengguna
+- `simbol` untuk menyimpan simbol pemain yang terkait dengan jenis pemain yang dipilih
+- `idMemori`untuk menyimpan ID memori bersama
+- `pilihanPemain` yang merupakan pointer ke struktur `IdentitasPemain` yang digunakan untuk menyimpan pilihan pemain (jenis dan jumlah). Melalui `malloc`, dilakukan alokasi memori untuk menyimpan informasi pemain yang berbagi (jenis pemain yang dipilih dan jumlah pemain yang telah bergabung)
+- `shmget` untuk mendapatkan ID memori bersama melalui parameter kunci akses, ukuran memori, dan hak akses/permission memori bersama
+- `shmat()` digunakan untuk menautkan memori bersama yang telah dialokasikan ke variabel `pilihanPemain`
+- Program akan looping secara terus menerus sampai pemilihan pemain valid, yaitu ketika `periksaPemain()` mengembalikan nilai 0. Jika valid, maka informasi akan diperbarui di dalam variabel `pilihanPemain`
+- `msgget()` untuk mendapatkan ID antrian pesan dengan parameter kunci dan flag untuk membuat antrian pesan baru jika belum ada (IPC_CREAT) serta hak akses untuk antrian pesan
+- Variabel `simbol` ditentukan berdasarkan jenis pemain yang dipilih ('X' jika jenis pemain adalah 1 dan 'O' jika jenis pemain adalah 2)
+
+_5. Main Function program game.c. Dikarenakan ketika pemain dan game belum dimulai, maka pada terminal game.c tidak menampilkan apa-apa, Namun, saya memilih untuk menampilkan informasi menunggu pemain untuk bergabung dalam permainan_
+```C
+int main()
+{
+    int i, idAntrianPesan;
+    struct PemilihanPemain *pemilihanPemain = (struct PemilihanPemain *)malloc(sizeof(struct PemilihanPemain));
+    int idMemoriBerbagi;
+
+    idMemoriBerbagi = shmget((key_t)2121, 1024, 0666 | IPC_CREAT);
+    pemilihanPemain = shmat(idMemoriBerbagi, NULL, 0);
+    pemilihanPemain->pemain = 0;
+    pemilihanPemain->jumlah = 0;
+
+    printf("Menunggu pemain untuk bergabung dalam permainan...\n");
+    .....
+```
+- `i` untuk iterasi
+- `idAntrianPesan` untuk menyimpan ID antrian pesan
+- `pemilihanPemain` pointer ke struktur PemilihanPemain, yang digunakan untuk menyimpan informasi pemilihan pemain
+- `idMemoriBerbagi` untuk menyimpan ID memori bersama
+- `shmget` dan `shmat` untuk pengambilan dan penautan segmen memori bersama ke variabel `pemilihanPemain`. Nilai awal `pemain` dan `jumlah` di setting ke 0 menandakan bahwa belum ada pemain yang bergabung
+
+_6. Dokumentasi_
+- Terminal player.c
+![alt text](/resource/4a-1.png)
+- Kondisi ketika salah satu player sudah memilih tipe/jenis pemain
+![alt text](/resource/4a-2.png)
+- Kondisi ketika player memilih tipe/jenis pemain yang sudah dipilih oleh pemain sebelumnya
+![alt text](/resource/4a-3.png)
+- Terminal game.c
+![alt text](/resource/4a-4.png)
 
 ### Problem 4b
 Karena berjalan di terminal, program ini menggunakan nomor kotak (1-9) yang berurutan dari kiri atas ke kanan bawah untuk memudahkan pemilihan kotak. Program 'player.c' akan menampilkan kotak tic tac toe saat ini dan meminta input pengguna berupa nomor kotak sesuai gilirannya (player 'X' memulai terlebih dahulu). Input yang diberikan pengguna kemudian dikirimkan ke 'game.c' menggunakan message queue.
 
 **Jawab**
 
+_1. Membuat struct untuk menyimpan pergerakan setiap pemain. Pada kedua program memiliki struct ini untuk kebutuhan representasi gerakan pemain. Program ini pertama pada player.c dan kedua pada game.c_
+```C
+// struct untuk merepresentasikan gerakan pemain
+struct Gerakan
+{
+    long tipePesan; // tipe pesan yang digunakan dalam message queue)
+    int pemain; // nomor pemain yang melakukan gerakan (1 atau 2)
+    int sel; 
+};
+```
+```C
+// representasi gerakan pemain
+struct GerakanPemain
+{
+    long tipePesan; // tipe pesan yang digunakan dalam message queue)
+    int nomorPemain; // nomor pemain yang melakukan gerakan (1 atau 2)
+    int selPilihan; 
+};
+```
 
+_2. Kita berfokus dahulu pada program player.c. Pada program player.c kita harus membuat fungsi untuk menampilkan papan tic tac toe_
+```C
+// menginisialisasi papan permainan dan menampilkan sel-selnya
+void inisialisasiPapan()
+{
+    // membuat segmen memori bersama untuk papan permainan
+    int idMemori = shmget((key_t)1414, sizeof(char[MAX_CHESSBOARD][MAX_CHESSBOARD]), 0666 | IPC_CREAT);
+    // menautkan segmen memori bersama ke variabel papanPermainan
+    papanPermainan = shmat(idMemori, NULL, 0);
+
+    int nomorSel = 1;
+    printf("\n  ");
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            printf("%d", nomorSel++);
+            if (j < 2)
+            {
+                printf(" | ");
+            }
+        }
+        if (i < 2)
+            printf("\n -----------\n  ");
+    }
+    printf("\n\nPilih nomor sel yang sesuai untuk memilih sebuah sel.\n");
+    printf("\n");
+}
+```
+- `shmget()` untuk membuat segmen memori bersama (ukuran sesuai papan permainan) yang akan digunakan untuk menyimpan papan permainan. Segmen memori ini diberi kunci `(key_t)1414` untuk mengaksesnya di tempat lain dalam program. Hak akses `0666` untuk rw semua pengguna
+- `shmat` untuk menautkan ke variabel `papanPermainan`. Sehingga, `papanPermainan` akan menunjuk ke segmen memori yang telah dialokasikan untuk menyimpan papan permainan
+- Iterasi untuk menampilkan nomor sel dari 1 sampai 9 secara berurutan ke terminal. Setelah nomor sel ditampilkan, ditambahkan garis pemisah horizontal dan vertikal untuk membentuk tampilan papan permainan yang terdiri dari 3 baris dan 3 kolom
+
+_3. Main Function program player.c_
+```C
+while (1)
+    {
+        int giliran = 0, sel;
+        if (pilihanPemain->jumlah == 2)
+        {
+            printf("\n---- Permainan Dimulai!! ----\n\n");
+            printf("Anda bermain sebagai %c\n", simbol);
+            inisialisasiPapan();
+
+     .....
+```
+- `giliran` untuk menentukan giliran pemain
+- `sel`  untuk menyimpan nomor sel yang dipilih oleh pemain
+- jika jumlah pemain sudah 2, maka program akan dijalankan dan papan tic tac toe akan ditampilkan ke terminal player.c melalui pemanggilan fungsi `inisialisasiPapan()`
+
+_4. Membuat fungsi pada game.c untuk menyiapkan papan permainan dengan menginisialisasi segmen memori bersama yang akan digunakan untuk menyimpan status setiap sel pada papan permainan_
+```C
+void siapkanPapanPermainan()
+{
+    // Membuat segmen memori bersama untuk papan permainan
+    int idMemoriBerbagi = shmget((key_t)1414, sizeof(char[MAX_CHESSBOARD][MAX_CHESSBOARD]), 0666 | IPC_CREAT);
+    // Menautkan segmen memori bersama ke variabel papanPermainan
+    papanPermainan = shmat(idMemoriBerbagi, NULL, 0);
+
+    // Inisialisasi semua sel papan permainan dengan kosong
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            papanPermainan[i][j] = ' ';
+        }
+    }
+}
+```
+- `shmget()` untuk membuat segmen memori bersama (ukuran sesuai papan permainan) yang akan digunakan untuk menyimpan papan permainan. Segmen memori ini diberi kunci `(key_t)1414` untuk mengaksesnya di tempat lain dalam program. Hak akses `0666` untuk rw semua pengguna
+- `shmat()` untuk menautkan ke variabel `papanPermainan`. Dengan demikian, variabel `papanPermainan` akan menunjuk ke segmen memori yang telah dialokasikan untuk menyimpan papan permainan
+- Iterasi untuk menginisialisasi setiap sel pada papan permainan dengan karakter kosong (`' '`)
+
+_5. Main Function game.c. Program ini untuk menerima gerakan pemain dari antrian pesan, mengekstraksi informasi tentang gerakan tersebut, dan menampilkan informasi tersebut ke layar_
+```C
+int main()
+{
+    .....
+
+    int giliranSaatIni = 0;
+    while (1)
+    {
+        if (pemilihanPemain->jumlah == 2)
+        {
+            siapkanPapanPermainan();
+            idAntrianPesan = msgget((key_t)3030, IPC_CREAT | 0644);
+
+            printf("---- Permainan Dimulai! ----\n");
+            while (1)
+            {
+                int giliranPemainSekarang = giliranSaatIni % 2 + 1;
+                int selPilihan;
+
+                struct GerakanPemain gerakanPemain;
+                struct GerakanValid validitas, validitas2;
+
+                // Menerima gerakan pemain dari antrian pesan
+                msgrcv(idAntrianPesan, &gerakanPemain, sizeof(gerakanPemain), 1, 0);
+
+                int pemainSekarang = gerakanPemain.nomorPemain;
+                selPilihan = gerakanPemain.selPilihan;
+                char simbol;
+                printf("Pesan Baru\n");
+                if (pemainSekarang == 1)
+                {
+                    printf("Pengirim: Pemain X\nPesan: %d\n", selPilihan);
+                    simbol = 'X';
+                }
+                else
+                {
+                    printf("Pengirim: Pemain O\nPesan: %d\n", selPilihan);
+                    simbol = 'O';
+                }
+     .....
+```
+- Struct `GerakanValid` belum saya jelaskan disini, nanti akan saya jelaskan pada problem 4c
+- Jika jumlah pemain sudah 2, maka permainan dapat dimulai dengan memanggil fungsi `siapkanPapanPermainan()` dan mendapatkan ID antrian pesan melalui `msgget()`
+- Dengan `msgrcv()`, program menerima pesan yang dikirimkan ke antrian pesan dengan ID `idAntrianPesan`.
+Pesan yang diterima disimpan dalam variabel `gerakanPemain`
+- Variabel `pemainSekarang` diisi dengan nomor pemain yang melakukan gerakan, yang diambil dari `gerakanPemain.nomorPemain`
+- Variabel `selPilihan` diisi dengan nomor sel yang dipilih oleh pemain tersebut, yang diambil dari `gerakanPemain.selPilihan`
+
+_6. Dokumentasi_
+- Terminal player.c dengan jenis pemain 'X'
+![alt text](/resource/4b-1.png)
+- Terminal player.c dengan jenis pemain 'O'
+![alt text](/resource/4b-2.png)
+- Terminal game.c ketika pemain sudah memilih sel
+![alt text](/resource/4b-3.png)
 
 ### Problem 4c
 Selanjutnya, ‘game.c’ harus mengecek apakah input user sesuai atau tidak berdasarkan nilai kotak permainan saat ini. Kirimkan pesan error kepada pengguna jika nomor kotak yang dipilih tidak kosong atau diluar angka 1-9. Pesan dapat dikirimkan melalui message queue dengan ‘mesg_type’ yang berbeda.
 
 **Jawab**
 
+_1. Menindaklanjuti dari 4b, maka kita akan membuat struct pada game.c dan player.c. Struct ini digunakan untuk mengecek gerakan atau input dari pemain itu valid. Program berikut, pertama pada game.c dan kedua pada player.c_
+```C
+struct GerakanValid
+{
+    long tipePesan; // Tipe pesan (digunakan dalam message queue)
+    int kodeStatus; // Kode status validitas gerakan (0: tidak valid, 1: valid, 2: menang, 3: sel tidak valid, 4: seri)
+    char simbolMenang; // Simbol pemain yang menang (jika ada)
+};
+```
+```C
+struct GerakanValid
+{
+    long tipePesan; // tipe pesan yang (digunakan dalam message queue)
+    int status; // kode status validitas gerakan (0: tidak valid, 1: valid, 2: menang, 3: nomor sel tidak valid, 4: seri)
+    char simbolPemenang;
+};
+```
+- Kedua struct memiliki kegunaan yang sama di masing-masing program, yaitu untuk mengecek valid atau tidaknya gerakan pemain di tic tac toe
 
+_2. Mungkin pada penjelasan poin 2 berikut sampai selesai akan mewakili juga jawaban nomor 4d karena problem 4c dan 4d saling berhubungan. Selanjutnya, kita beralih pada program player.c terlebih dahulu. Di sini, kita membuat fungsi untuk menampilkan papan secara real time_
+```C
+void tampilkanPapan()
+{
+    printf("\n  ");
+    for (int i = 0; i < MAX_CHESSBOARD; i++)
+    {
+        for (int j = 0; j < MAX_CHESSBOARD; j++)
+        {
+            printf("%c", papanPermainan[i][j]);
+            if (j < 2)
+            {
+                printf(" | ");
+            }
+        }
+        if (i < 2)
+            printf("\n -----------\n  ");
+    }
+    printf("\n\n\n");
+}
+```
+- Pada setiap sel, karakter yang sesuai dengan status sel pada papan permainan ('X', 'O', atau ' ') dicetak ke terminal
+- Program di atas, intinya bertanggung jawab untuk menampilkan tampilan visual dari papan permainan ke layar, sehingga pemain dapat melihat status terkini dari papan permainan saat mereka bermain
+
+_3. Main Function player.c. Program ini merupakan kelanjutan dari problem 4b poin 3. Program ini mengatur jalannya permainan tic-tac-toe antara dua pemain_
+```C
+int main()
+{
+    ......
+            while (1)
+            {
+                struct Gerakan gerakanPemain;
+                struct GerakanValid validitas;
+                if (tipePemain == (giliran % 2) + 1)
+                {
+                    printf("Giliran Anda!\n");
+                    printf("Masukkan nomor sel: ");
+                    scanf("%d", &sel);
+
+                    gerakanPemain.tipePesan = 1; // tipe pesan 1 untuk gerakan pemain
+                    gerakanPemain.pemain = tipePemain;
+                    gerakanPemain.sel = sel;
+
+                    msgsnd(idAntrian, &gerakanPemain, sizeof(gerakanPemain), 0); // mengirim gerakan pemain ke antrian pesan
+                }
+                else
+                {
+                    // menampilkan pesan untuk pemain yang tidak sedang gilirannya
+                    if (simbol == 'X')
+                    {
+                        printf("Giliran pemain O...\n");
+                    }
+                    else
+                    {
+                        printf("Giliran pemain X...\n");
+                    }
+                }
+
+                msgrcv(idAntrian, &validitas, sizeof(validitas), tipePemain + 1, 0); // menerima validitasgerakan dari antrian pesan
+
+                if (validitas.status == 1)
+                {
+                    // jika gerakan valid, tampilkan papan permainan
+                    giliran++;
+                    tampilkanPapan();
+                }
+                else if (validitas.status == 0 && tipePemain == (giliran % 2) + 1)
+                {
+                    // jika gerakan tidak valid, tampilkan pesan kesalahan
+                    printf("Sel tersebut sudah terisi !!\n");
+                }
+                else if (validitas.status == 2)
+                {
+                    // jika permainan selesai dan pemain menang
+                    tampilkanPapan();
+                    if (simbol == validitas.simbolPemenang)
+                    {
+                        printf("---- Permainan Selesai! ----\n");
+                        printf("Selamat, Anda menang! :)\n");
+                    }
+                    else
+                    {
+                        printf("---- Permainan Selesai! ----\n");
+                        printf("Maaf, Anda kalah! :(\n");
+                    }
+                    break;
+                }
+                else if (validitas.status == 3 && tipePemain == (giliran % 2) + 1)
+                {
+                    // jika nomor sel tidak valid, tampilkan pesan kesalahan
+                    printf("Nomor sel harus antara 1 - 9 !!\n");
+                }
+                else if (validitas.status == 4)
+                {
+                    // jika permainan berakhir seri, tampilkan pesan seri
+                    tampilkanPapan();
+                    printf("---- Permainan Selesai! ----\n");
+                    printf("Permainan berakhir seri\n");
+                    break;
+                }
+            }
+            break;
+        }
+    }
+}
+```
+- Variabel `giliran` digunakan untuk menentukan giliran pemain saat ini dengan cara melakukan operasi modulus terhadap variabel tersebut. Jika giliran saat ini sama dengan jenis pemain yang sedang aktif (variabel `tipePemain`), program meminta pemain tersebut untuk memilih nomor sel yang ingin dipilih
+- Setelah pemain memasukkan nomor sel, gerakan pemain tersebut dikemas ke dalam struct `Gerakan` yang memiliki informasi tentang tipe pesan, jenis pemain, dan nomor sel. Kemudian gerakan tersebut dikirimkan ke antrian pesan menggunakan fungsi `msgsnd()`
+- Setelah pemain melakukan gerakan, program menerima pesan yang berisi validitas gerakan tersebut dari antrian pesan menggunakan fungsi `msgrcv()`. Pesan ini berisi informasi tentang apakah gerakan tersebut valid, tidak valid, atau berbagai kondisi lainnya
+- Dalam case ini, kita menggunakan 5 kode validitas, 0: tidak valid, 1: valid, 2: menang, 3: sel tidak valid, 4: seri. Percabangan `if` dan `else if` digunakan di dalam loop untuk memeriksa kondisi dari setiap langkah permainan. Percabangan ini memungkinkan program untuk mengambil tindakan yang berbeda tergantung pada status permainan pada saat itu (penjelasan ada di bawah ini)
+- Jika gerakan tidak valid (bernilai '0'), pesan kesalahan ditampilkan
+- Jika gerakan pemain valid (bernilai '1'), papan permainan diperbarui dan giliran pemain berganti
+- Jika nomor sel tidak valid (bernilai '3'), pesan kesalahan ditampilkan
+- Jika permainan selesai dengan pemenang (bernilai '2'), pesan kemenangan atau kekalahan ditampilkan sesuai kondisi pemain
+- Jika permainan berakhir seri (bernilai '4'), pesan seri ditampilkan
+
+_4. Penjelasan pada program player.c telah selesai, selanjutnya berganti pada program game.c untuk membuat fungsi untuk memperbarui papan permainan_
+```C
+int terapkanGerakan(int selPilihan, char simbolPemain)
+{
+    // Memeriksa apakah nomor sel valid (antara 1 dan 9)
+    if (selPilihan < 1 || selPilihan > 9)
+    {
+        printf("-- Tidak valid: Nomor sel harus antara 1 dan 9! --\n");
+        return -1;
+    }
+
+    // Menghitung baris dan kolom berdasarkan nomor sel
+    int baris = (selPilihan - 1) / MAX_CHESSBOARD;
+    int kolom = (selPilihan - 1) % MAX_CHESSBOARD;
+    int isValid = 1;
+
+    // Periksa apakah sel yang dipilih sudah terisi
+    if (papanPermainan[baris][kolom] != ' ')
+    {
+        printf("-- Tidak valid: Sel sudah terisi! --\n");
+        isValid = 0;
+    }
+    else
+    {
+        papanPermainan[baris][kolom] = simbolPemain; // Menambahkan simbol pemain ke sel yang dipilih
+    }
+
+    return isValid;
+}
+```
+- Pertama, fungs akan memeriksa apakah nomor sel yang dipilih berada dalam rentang valid antara 1 dan 9. Jika nomor sel diluar rentang tersebut, fungsi akan mencetak pesan kesalahan dan mengembalikan nilai `-1` untuk menandakan bahwa gerakan tidak valid
+- Jika valid, fungsi akan menghitung baris dan kolom yang sesuai dengan nomor sel tersebut menggunakan operasi sederhana. Terlihat bahwa `selPilihan - 1`, ini dikarenakan indeks array dimulai dari 0, sedangkan nomor sel dimulai dari 1. Sehingga diperlukan pengurangan 1
+- `papanPermainan[baris][kolom] != ' '` untuk mengecek apakah sel sudah terisi, jika sudah maka gerakan tidak valid. Jika belum terisi, `simbolPemain` akan ditambahkan ke sel
+- Mengembalikan nilai `isValid`. Jika bernilai 0 berarti tidak valid, jika bernilai 1 maka valid
+
+_5. Membuat fungsi untuk mengecek kondisi pemain jika menang pada game.c_
+```C
+int periksaMenang(char simbol)
+{
+    // Memeriksa baris, kolom, dan diagonal untuk mencari tanda-tanda kemenangan
+    if (papanPermainan[0][0] == simbol && papanPermainan[0][1] == simbol && papanPermainan[0][2] == simbol ||
+        papanPermainan[1][0] == simbol && papanPermainan[1][1] == simbol && papanPermainan[1][2] == simbol ||
+        papanPermainan[2][0] == simbol && papanPermainan[2][1] == simbol && papanPermainan[2][2] == simbol ||
+        papanPermainan[0][0] == simbol && papanPermainan[1][0] == simbol && papanPermainan[2][0] == simbol ||
+        papanPermainan[0][1] == simbol && papanPermainan[1][1] == simbol && papanPermainan[2][1] == simbol ||
+        papanPermainan[0][2] == simbol && papanPermainan[1][2] == simbol && papanPermainan[2][2] == simbol ||
+        papanPermainan[0][0] == simbol && papanPermainan[1][1] == simbol && papanPermainan[2][2] == simbol ||
+        papanPermainan[0][2] == simbol && papanPermainan[1][1] == simbol && papanPermainan[2][0] == simbol)
+    {
+        return 1; // Kondisi menang terpenuhi
+    }
+    return 0; // Belum ada pemenang
+}
+```
+- Intinya, fungsi tersebut digunakan untuk mengecek simbol yang sama secara horizontal (baris), vertikal (kolom), ataupun diagonal pada papan. Jika salah satu kondisi di atas terpenuhi, fungsi akan mengembalikan nilai 1. Jika tidak terpenuhi, fungsi akan mengembalikan nilai 0
+
+_6. Setelah membuat fungsi pada poin 5, dilanjutkan membuat fungsi untuk mengecek kondisi pemain jika seri/seimbang/draw_
+```C
+int periksaImbang()
+{
+    int selTerisi = 0;
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            if (papanPermainan[i][j] != ' ')
+            {
+                selTerisi++; // Menghitung jumlah sel yang terisi
+            }
+        }
+    }
+    if (selTerisi == 9)
+    {
+        return 1; // Semua sel sudah terisi, menunjukkan imbang
+    }
+    return 0; // Permainan belum imbang
+}
+```
+- Pertama, fungsi menginsialisasi variabel `selTerisi` dengan nilai 0 yang nantinya digunakan untuk menghitung jumlah sel yang sudah terisi pada papan
+- `papanPermainan[i][j] != ' '` untuk mengecek isi dari sel (selain spasi). Jika terpenuhi, variabel `selTerisi` akan bertambah 1
+- `selTerisi == 9` untuk mengecek bahwa jumlah sel yang terisi sama dengan jumlah total sel. Sehingga, fungsi akan mengembalikan nilai 1 yang menunjukkan bahwa permainan berkahir dengan seri/imbang/draw
+
+_7. Kita lanjutkan pada Main Function pada program game.c_
+```C
+int main()
+{
+    .....
+            while (1)
+            {
+                int giliranPemainSekarang = giliranSaatIni % 2 + 1;
+                int selPilihan;
+
+                struct GerakanPemain gerakanPemain;
+                struct GerakanValid validitas, validitas2;
+
+                // Menerima gerakan pemain dari antrian pesan
+                msgrcv(idAntrianPesan, &gerakanPemain, sizeof(gerakanPemain), 1, 0);
+
+                int pemainSekarang = gerakanPemain.nomorPemain;
+                selPilihan = gerakanPemain.selPilihan;
+                char simbol;
+                printf("Pesan Baru\n");
+                if (pemainSekarang == 1)
+                {
+                    printf("Pengirim: Pemain X\nPesan: %d\n", selPilihan);
+                    simbol = 'X';
+                }
+                else
+                {
+                    printf("Pengirim: Pemain O\nPesan: %d\n", selPilihan);
+                    simbol = 'O';
+                }
+
+                // Memvalidasi dan menerapkan gerakan pemain ke papan permainan
+                if (terapkanGerakan(selPilihan, simbol) == 1)
+                {
+                    if (periksaMenang(simbol))
+                    {
+                        // Jika pemain menang, kirim pesan ke antrian pesan
+                        validitas.kodeStatus = 2; // menang
+                        validitas2.kodeStatus = 2;
+                        validitas.tipePesan = 2;
+                        validitas2.tipePesan = 3;
+                        validitas.simbolMenang = simbol;
+                        validitas2.simbolMenang = simbol;
+                        msgsnd(idAntrianPesan, &validitas, sizeof(validitas), 0);
+                        msgsnd(idAntrianPesan, &validitas2, sizeof(validitas2), 0);
+                        printf("%c Pemain menang!!\n", simbol);
+                        printf("---- Permainan Selesai! ----\n");
+                        break;
+                    }
+                    else if (periksaImbang() == 1)
+                    {
+                        // Jika permainan berakhir imbang, kirim pesan ke antrian pesan
+                        validitas.kodeStatus = 4;
+                        validitas2.kodeStatus = 4;
+                        validitas.tipePesan = 2;
+                        msgsnd(idAntrianPesan, &validitas, sizeof(validitas), 0);
+                        validitas2.tipePesan = 3;
+                        msgsnd(idAntrianPesan, &validitas2, sizeof(validitas2), 0);
+                        printf("Permainan berakhir seri\n");
+                        printf("---- Permainan Selesai! ----\n");
+                        break;
+                    }
+                    else
+                    {
+                        // Jika gerakan valid, lanjutkan dengan giliran pemain berikutnya
+                        validitas.kodeStatus = 1;
+                        validitas2.kodeStatus = 1;
+                        validitas.tipePesan = 2;
+                        msgsnd(idAntrianPesan, &validitas, sizeof(validitas), 0);
+                        validitas2.tipePesan = 3;
+                        msgsnd(idAntrianPesan, &validitas2, sizeof(validitas2), 0);
+                        giliranSaatIni++; // Pindah ke giliran pemain berikutnya
+                    }
+                }
+                else if (terapkanGerakan(selPilihan, simbol) == -1)
+                { // <1 || >9
+                    // Jika nomor sel tidak valid, kirim pesan ke antrian pesan
+                    validitas.tipePesan = 2;
+                    validitas.kodeStatus = 3;
+                    msgsnd(idAntrianPesan, &validitas, sizeof(validitas), 0);
+                    validitas2.tipePesan = 3;
+                    validitas2.kodeStatus = 3;
+                    msgsnd(idAntrianPesan, &validitas2, sizeof(validitas2), 0);
+                }
+                else
+                {
+                    // Jika gerakan tidak valid, kirim pesan ke antrian pesan
+                    validitas.tipePesan = 2;
+                    validitas.kodeStatus = 0;
+                    msgsnd(idAntrianPesan, &validitas, sizeof(validitas), 0);
+                    validitas2.tipePesan = 3;
+                    validitas2.kodeStatus = 0;
+                    msgsnd(idAntrianPesan, &validitas2, sizeof(validitas2), 0);
+                }
+            }
+            break;
+        }
+    }
+}
+```
+- Kita langsung loncat pada percabangan `if else` `terapkanGerakan`. Semua gerakan pemain diterapkan ke papan dengan menggunakan fungsi `terapkanGerakan`
+- Jika gerakan valid (bernilai '1'), maka program akan mengecek semua kondisi dengan memanggil fungsi `periksaMenang(simbol)` untuk mengecek apakah gerakan tersebut sudah menang dan `periksaImbang() == 1` untuk mengecek gerakan tersebut akan menghasilkan seri. Jika kedua kondisi tersebut tidak terpenuhi, maka program melanjutkan ke giliran pemain berikutnya dengan meningkatkan `giliranSaatIni` 
+- Jika nomor sel tidak valid (`terapkanGerakan` mengembalikan nilai -1), program mengirimkan pesan kesalahan nomor sel ke antrian pesan
+- Jika gerakan tidak valid (sel telah terisi sebelumnya), program mengirimkan pesan kesalahan gerakan ke antrian pesan
+- `validitas.kodeStatus` dan `validitas2.kodeStatus` untuk memberikan informasi tentang status pesan yang dikirim. 0 : tidak valid, 1 : valid, 2 : menang, 3 : sel tidak valid, 4 : seri
+- `validitas.tipePesan` dan `validitas2.tipePesan` ntuk menunjukkan jenis pesan yang dikirim. 1 : berisi gerakan pemain, 2 : pesan berisi validitas gerakan untuk pemain yang sedang giliran, 3 : pesan berisi validitas gerakan untuk pemain yang tidak sedang giliran
+
+_8. Dokumentasi_
+- Ketika pemain sudah memilih beberapa sel
+![alt text](/resource/4c-1.png)
+- Ketika pemain memilih sel yang sudah diisi/dipilih oleh pemain lain
+![alt text](/resource/4c-2.png)
+- ketika pemain memilih sel diluar 1 sampai 9
+![alt text](/resource/4c-3.png)
 
 ### Problem 4d
 Jika input valid, ‘game.c’ perlu mengubah nilai pada kotak tic-tac-toe dan memutuskan apakah permainan telah selesai atau masih berlanjut. Permainan telah selesai jika kotak telah terisi semua (seri) atau terdapat simbol (‘X’ atau ‘O’) yang membentuk garis vertikal, horizontal, maupun diagonal. Kotak tic tac toe yang telah diperbarui dan hasil akhir permainan (jika sudah berakhir) dikirimkan ke 'player.c' untuk kemudian ditampilkan kepada pengguna.
 
 **Jawab**
 
+Dikarenakan penjelasan 4d ini sudah dijelaskan pada poin 4c, maka saya hanya melampirkan dokumentasinya saja
 
+- Kondisi ketika menang (POV Pemenang)
+![alt text](/resource/4d-1.png)
+- Kondisi ketika menang (POV Kalah)
+![alt text](/resource/4d-2.png)
+- Kondisi ketika seri/imbang/draw
+![alt text](/resource/4d-3.png)
+- Terminal game.c
+![alt text](/resource/4d-4.png)
 
 ### Kendala
 
-> [Format : Penjelasan Kendala + Solusi (jika ada)]
+Pada proses IPC antara program satu dengan program yang lain. Namun, akhirnya ketika revisi problem IPC tersebut bisa terselesaikan.
 
 <div align=center>
 
