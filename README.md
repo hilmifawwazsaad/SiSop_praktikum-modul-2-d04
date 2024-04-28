@@ -2192,6 +2192,7 @@ else {  // Jika ini adalah proses parent
 Jika proses parent, ini akan menunggu proses child kedua selesai. Jika proses child kedua berhasil, file zip yang diekstrak akan dihapus dengan remove(ZIP_FILE). Log juga dicatat untuk menunjukkan keberhasilan ekstraksi. Setelah itu, fungsi preprocessing() dijalankan untuk melakukan pemrosesan data dan grouping() untuk pengelompokan data.
 
 _Dokumentasi_
+
 ![alt text](/resource/3a-1.png)
 
 ### Problem 3b
@@ -2343,9 +2344,8 @@ logbook("Data preprocessing completed.");  // Catat log selesai pemrosesan
 Bagian ini menutup file input dan file sementara. Setelah pemrosesan selesai, file input lama dihapus dan file sementara diganti namanya menjadi file asli. Setelah semua langkah selesai, pesan log dicatat untuk mencatat bahwa pemrosesan data telah selesai.
 
 _Dokumentasi_
+
 ![alt text](/resource/3b-1.png)
-
-
 
 ### Problem 3c
 Kemudian dari dataset tersebut, Rama mengelompokkannya berdasarkan ID Lokasi dan memisahkannya menjadi dataset baru dengan format nama “city_{ID Lokasi}” contoh “city_5012725.csv”. Semua dataset baru tersebut dimasukan ke dalam folder bernama “city_group”.
@@ -2485,6 +2485,7 @@ logbook("Successfully grouped data.\n");  // Catat log selesai pengelompokan
 Bagian ini menutup semua file yang telah dibuka untuk menghindari kebocoran memori dan file yang terbuka. Penutupan dilakukan dengan iterasi melalui seluruh array file_map dan menutup file jika tidak NULL. Setelah itu, file input juga ditutup. Terakhir, pesan log dicatat untuk menandai bahwa pengelompokan telah berhasil dilakukan.
 
 _Dokumentasi_
+
 ![alt text](/resource/3c-1.png)
 
 ### Problem 3d
@@ -2549,6 +2550,7 @@ fclose(log_file);  // Tutup file log
 Bagian ini menulis pesan log ke dalam file dengan format yang sudah ditentukan, termasuk stempel waktu dan pesan yang diterima sebagai argumen. fprintf digunakan untuk menulis ke file dengan format tertentu. Setelah pesan ditulis, file ditutup menggunakan fclose untuk memastikan semua data disimpan dengan benar dan untuk mencegah kebocoran sumber daya.
 
 _Dokumentasi_
+
 ![alt text](/resource/3d-1.png)
 
 ### Kendala
